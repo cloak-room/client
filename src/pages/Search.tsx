@@ -2,10 +2,10 @@ import {
   IonContent,
   IonHeader,
   IonPage,
+  IonSearchbar,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import ExploreContainer from "../components/ExploreContainer/";
 
 export default function SearchPage() {
   return (
@@ -21,7 +21,9 @@ export default function SearchPage() {
             <IonTitle size="large">Search</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <ExploreContainer name="Search page" />
+        <main>
+        <IonSearchbar placeholder="Search Device"></IonSearchbar>
+        </main>
       </IonContent>
     </IonPage>
   );
