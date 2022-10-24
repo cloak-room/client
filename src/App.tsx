@@ -64,12 +64,12 @@ export default function App() {
         <IonTabs>
           <IonRouterOutlet>
             {tabs.map((tab) => (
-              <Route path={`/${tab.slug}`}>{tab.element}</Route>
+              <Route key={tab.slug} path={`/${tab.slug}`}>{tab.element}</Route>
             ))}
           </IonRouterOutlet>
           <IonTabBar slot="bottom">
             {tabs.map((tab) => (
-              <IonTabButton tab={tab.slug} href={`/${tab.slug}`}>
+              <IonTabButton key={tab.slug} tab={tab.slug} href={`/${tab.slug}`}>
                 <IonIcon icon={tab.icon} />
                 <IonLabel>{tab.label}</IonLabel>
               </IonTabButton>
