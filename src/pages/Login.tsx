@@ -5,7 +5,7 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import ExploreContainer from "../components/ExploreContainer";
+import ExploreContainer from "../components/ExploreContainer/";
 
 export default function LoginPage() {
   return (
