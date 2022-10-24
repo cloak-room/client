@@ -11,9 +11,9 @@ import {
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { ellipse, square, triangle } from "ionicons/icons";
-import AddDevice from "./pages/AddDevice";
-import Tab2 from "./pages/Tab2";
-import Tab3 from "./pages/Tab3";
+import AddDevicePage from "./pages/AddDevice";
+import LoginPage from "./pages/Login";
+import SearchPage from "./pages/Search";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -41,42 +41,42 @@ const tabs = [
     label: "Add",
     slug: "addDevice",
     icon: triangle,
-    element: <AddDevice />,
+    element: <AddDevicePage />,
   },
   {
-    label: "Tab 2",
-    slug: "tab2",
+    label: "Login",
+    slug: "login",
     icon: ellipse,
-    element: <Tab2 />,
+    element: <LoginPage />,
   },
   {
-    label: "Tab 3",
-    slug: "tab3",
+    label: "Search",
+    slug: "search",
     icon: square,
-    element: <Tab3 />,
+    element: <SearchPage />,
   },
 ];
 
-const App: React.FC = () => (
-  <IonApp>
-    <IonReactRouter>
-      <IonTabs>
-        <IonRouterOutlet>
-          {tabs.map((tab) => (
-            <Route path={`/${tab.slug}`}>{tab.element}</Route>
-          ))}
-        </IonRouterOutlet>
-        <IonTabBar slot="bottom">
-          {tabs.map((tab) => (
-            <IonTabButton tab={tab.slug} href={`/${tab.slug}`}>
-              <IonIcon icon={tab.icon} />
-              <IonLabel>{tab.label}</IonLabel>
-            </IonTabButton>
-          ))}
-        </IonTabBar>
-      </IonTabs>
-    </IonReactRouter>
-  </IonApp>
-);
-
-export default App;
+export default function App() {
+  return (
+    <IonApp>
+      <IonReactRouter>
+        <IonTabs>
+          <IonRouterOutlet>
+            {tabs.map((tab) => (
+              <Route path={`/${tab.slug}`}>{tab.element}</Route>
+            ))}
+          </IonRouterOutlet>
+          <IonTabBar slot="bottom">
+            {tabs.map((tab) => (
+              <IonTabButton tab={tab.slug} href={`/${tab.slug}`}>
+                <IonIcon icon={tab.icon} />
+                <IonLabel>{tab.label}</IonLabel>
+              </IonTabButton>
+            ))}
+          </IonTabBar>
+        </IonTabs>
+      </IonReactRouter>
+    </IonApp>
+  );
+}

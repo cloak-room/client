@@ -7,21 +7,21 @@ import {
 } from "@ionic/react";
 import ExploreContainer from "../components/ExploreContainer";
 
-export default function AddDevicePage() {
+export default function SearchPage() {
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Add Device</IonTitle>
+          <IonTitle>Search</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
         <IonHeader collapse="condense">
           <IonToolbar>
-            <IonTitle size="large">Add Device</IonTitle>
+            <IonTitle size="large">Search</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <ExploreContainer name="Add device page" />
+        <ExploreContainer name="Search page" />
       </IonContent>
     </IonPage>
   );
