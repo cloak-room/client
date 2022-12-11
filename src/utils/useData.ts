@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-export default function useData(getData: () => Promise<any[]>) {
-  const [data, setData] = useState<any[]>([]);
+export default function useData<T>(getData: () => Promise<T>) {
+  const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -12,7 +12,7 @@ export default function useData(getData: () => Promise<any[]>) {
         setLoading(false);
       })
       .catch((err) => {
-        setData([]);
+        setData(null);
         setLoading(false);
         setError(err);
       });

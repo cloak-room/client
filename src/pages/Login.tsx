@@ -12,30 +12,36 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import React, { useState } from "react";
+import { apiUrl } from "../App";
+import { User, useUserCtx } from "../context/UserContext";
 import useData from "../utils/useData";
 
 async function getUsers() {
-  const url = `${process.env.API ?? ""}/getUsers`;
+  const url = `${apiUrl}/users`;
   const response = await fetch(url);
   console.log(response);
 
-  console.log();
-
-  // const data: any[] = await response.json();
-  const data = Array.from({ length: 10 }, (_, k) => ({
-    username: `User ${k + 1}`,
-  }));
+  const data: User[] = await response.json();
   console.log(data);
 
   return data;
 }
 
 export default function LoginPage() {
-  const { data: users, loading, error } = useData(getUsers);
+  const { data: users, loading, error } = useData<User[]>(getUsers);
+  const { setUser } = useUserCtx();
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>(""); // For later
 
   const handleLogin = async (event: React.MouseEvent<HTMLIonButtonElement>) => {
+    console.log(users);
+    const selected = users?.find((i) => i.id === parseInt(username));
+
+    if (selected) {
+      setUser(selected);
+      console.log('logged in', selected)
+    }
+    return;
     const url = `${process.env.API ?? ""}/login`;
     const args = { username }; // Implement password later
     console.log("send", args);
@@ -69,16 +75,17 @@ export default function LoginPage() {
               }
               placeholder="Select username"
             >
-              {users.map((user) => (
-                <IonItem>
-                  <IonLabel>{user.username}</IonLabel>
-                  <IonRadio
-                    slot="end"
-                    key={user.username}
-                    value={user.username}
-                  ></IonRadio>
-                </IonItem>
-              ))}
+              {users &&
+                users.map((user) => (
+                  <IonItem>
+                    <IonLabel>{user.username}</IonLabel>
+                    <IonRadio
+                      slot="end"
+                      key={user.username}
+                      value={user.id}
+                    ></IonRadio>
+                  </IonItem>
+                ))}
             </IonRadioGroup>
             <IonButton onClick={handleLogin}>Login</IonButton>
           </IonList>
