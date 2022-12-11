@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiUrl } from "../App";
-import { ItemType, PaymentMethod } from "./types";
+import { Item, ItemType, PaymentMethod } from "./types";
 
 export default function useData<T>(
   getData: (...args: any[]) => Promise<T>,
@@ -53,6 +53,26 @@ async function getByDate(date: string | null) {
   return await res.json();
 }
 
+async function getItems(
+  search: string = "",
+  start: string = "",
+  end: string = ""
+) {
+  console.log(search);
+  const startTime = new Date(start);
+  const endTime = new Date(end);
+
+  const searchToken = search === "" ? "" : `q=${search}&`;
+  const startToken = start === "" ? "" : `from=${startTime.toISOString()}&`;
+  const endToken = end === "" ? "" : `&to=${endTime.toISOString()}`;
+
+  const res = await fetch(
+    `${apiUrl}/items?${searchToken}${startToken}${endToken}`
+  );
+
+  return await res.json();
+}
+
 async function getPaymentMethods() {
   const url = `${apiUrl}/payment_methods`;
   const response = await fetch(url);
@@ -72,4 +92,29 @@ export function useDaily(date: string | null = null) {
 
 export function useItemTypes() {
   return useData(getItemTypes);
+}
+
+export function useItems(
+  search: string = "",
+  start: string = "",
+  end: string = ""
+) {
+  const [data, setData] = useState<Item[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<any>(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setData(await getItems(search, start, end));
+        setLoading(false);
+      } catch (err) {
+        setData(null);
+        setLoading(false);
+        setError(err);
+      }
+    })();
+  }, [search, start, end]);
+
+  return { data, loading, error };
 }
