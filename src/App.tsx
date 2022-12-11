@@ -1,4 +1,5 @@
 import { Route } from "react-router-dom";
+import "./app.scss";
 import {
   IonApp,
   IonIcon,
@@ -14,6 +15,7 @@ import { ellipse, square, triangle } from "ionicons/icons";
 import AddDevicePage from "./pages/AddDevice";
 import LoginPage from "./pages/Login";
 import SearchPage from "./pages/Search";
+import PrintReport from "./pages/PrintReport";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -60,6 +62,15 @@ const tabs = [
   },
 ];
 
+const hiddenPages = [
+  {
+    label: "Print Report",
+    slug: "report",
+    icon: square,
+    element: <PrintReport />,
+  },
+];
+
 export default function App() {
   return (
     <UserProvider>
@@ -67,13 +78,13 @@ export default function App() {
         <IonReactRouter>
           <IonTabs>
             <IonRouterOutlet>
-              {tabs.map((tab) => (
+              {[...tabs, ...hiddenPages].map((tab) => (
                 <Route key={tab.slug} path={`/${tab.slug}`}>
                   {tab.element}
                 </Route>
               ))}
             </IonRouterOutlet>
-            <IonTabBar slot="bottom">
+            <IonTabBar slot="bottom" className="dont-print">
               {tabs.map((tab) => (
                 <IonTabButton
                   key={tab.slug}

@@ -15,39 +15,12 @@ import {
 import React, { useEffect, useState } from "react";
 import { apiUrl } from "../App";
 import { useUserCtx } from "../context/UserContext";
-import useData from "../utils/useData";
-
-type ItemType = {
-  id: string;
-  name: string;
-  price: string;
-};
-
-async function getItemTypes() {
-  const url = `${apiUrl}/item_types`;
-  const response = await fetch(url);
-  console.log(response);
-
-  const data: ItemType[] = await response.json();
-  console.log(data);
-
-  return data;
-}
-
-async function getPaymentMethods() {
-  const url = `${apiUrl}/payment_methods`;
-  const response = await fetch(url);
-  console.log(response);
-
-  const data: ItemType[] = await response.json();
-  console.log(data);
-
-  return data;
-}
+import useData, { usePaymentMethods, useItemTypes } from "../utils/useData";
+import { ItemType, PaymentMethod } from "../utils/types";
 
 export default function AddDevicePage() {
-  const { data: itemTypes } = useData(getItemTypes);
-  const { data: paymentMethods } = useData(getPaymentMethods);
+  const { data: itemTypes } = useItemTypes();
+  const { data: paymentMethods } = usePaymentMethods();
 
   const { user } = useUserCtx();
 
@@ -170,7 +143,7 @@ function InputItem({
   label: string;
   placeholder: string;
   state: [any, React.Dispatch<React.SetStateAction<any>>];
-  options?: { label: string; value: string }[];
+  options?: { label: string; value: number }[];
 }) {
   const [value, setValue] = state;
 
