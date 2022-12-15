@@ -13,6 +13,7 @@ specifiers:
   '@testing-library/react': ^13.3.0
   '@testing-library/user-event': ^12.6.3
   '@types/jest': ^26.0.20
+  '@types/lodash': ^4.14.191
   '@types/node': ^12.19.15
   '@types/react': ^18.0.17
   '@types/react-dom': ^18.0.6
@@ -20,11 +21,13 @@ specifiers:
   '@types/react-router-dom': ^5.1.7
   dotenv: ^16.0.3
   ionicons: ^6.0.3
+  lodash: ^4.17.21
   react: ^18.2.0
   react-dom: ^18.2.0
   react-router: ^5.2.0
   react-router-dom: ^5.3.4
   react-scripts: ^5.0.0
+  sass: ^1.56.2
   typescript: ^4.1.3
   web-vitals: ^0.2.4
   workbox-background-sync: ^5.1.4
@@ -52,6 +55,7 @@ dependencies:
   '@testing-library/react': 13.4.0_biqbaboplfbrettd7655fr4n2y
   '@testing-library/user-event': 12.8.3
   '@types/jest': 26.0.24
+  '@types/lodash': 4.14.191
   '@types/node': 12.20.55
   '@types/react': 18.0.21
   '@types/react-dom': 18.0.6
@@ -59,11 +63,13 @@ dependencies:
   '@types/react-router-dom': 5.3.3
   dotenv: 16.0.3
   ionicons: 6.0.3
+  lodash: 4.17.21
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
   react-router: 5.3.4_react@18.2.0
   react-router-dom: 5.3.4_react@18.2.0
-  react-scripts: 5.0.1_uz2ogxeagc4rbieizlfzyaazee
+  react-scripts: 5.0.1_wn5m6rruajui4xwl773xikpptm
+  sass: 1.56.2
   typescript: 4.8.4
   web-vitals: 0.2.4
   workbox-background-sync: 5.1.4
@@ -2666,6 +2672,10 @@ packages:
 
   /@types/json5/0.0.29:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
+    dev: false
+
+  /@types/lodash/4.14.191:
+    resolution: {integrity: sha512-BdZ5BCCvho3EIXw6wUCXHe7rS53AIDPLE+JzwgT+OsJk53oBfbSmZZ7CX4VaRoN78N+TJpFi9QPlfIVNmJYWxQ==}
     dev: false
 
   /@types/mime/3.0.1:
@@ -5829,6 +5839,10 @@ packages:
     resolution: {integrity: sha512-qenGE7CstVm1NrHQbMh8YaSzTZTFNP3zPqr3YU0S0UY441j4bJTg4A2Hh5KAhwgaiU6ZZ1Ar6y/2f4TblnMReQ==}
     dev: false
 
+  /immutable/4.1.0:
+    resolution: {integrity: sha512-oNkuqVTA8jqG1Q6c+UglTOD1xhC1BtjKI7XkCXRkZHrN5m18/XsnUp8Q89GkQO/z+0WjonSvl0FLhDYftp46nQ==}
+    dev: false
+
   /import-fresh/3.3.0:
     resolution: {integrity: sha512-veYYhQa+D1QBKznvhUHxb8faxlrwUnxseDAbAp457E0wLNio2bOSKnjYDhMj+YiAq61xrMGhQk9iXVk5FzgQMw==}
     engines: {node: '>=6'}
@@ -8640,7 +8654,7 @@ packages:
       tiny-warning: 1.0.3
     dev: false
 
-  /react-scripts/5.0.1_uz2ogxeagc4rbieizlfzyaazee:
+  /react-scripts/5.0.1_wn5m6rruajui4xwl773xikpptm:
     resolution: {integrity: sha512-8VAmEm/ZAwQzJ+GOMLbBsTdDKOpuZh7RPs0UymvBR2vRk4iZWCskjbFnxqjrzoIvlNNRZ3QJFx6/qDSi6zSnaQ==}
     engines: {node: '>=14.0.0'}
     hasBin: true
@@ -8689,7 +8703,7 @@ packages:
       react-refresh: 0.11.0
       resolve: 1.22.1
       resolve-url-loader: 4.0.0
-      sass-loader: 12.6.0_webpack@5.74.0
+      sass-loader: 12.6.0_sass@1.56.2+webpack@5.74.0
       semver: 7.3.8
       source-map-loader: 3.0.2_webpack@5.74.0
       style-loader: 3.3.1_webpack@5.74.0
@@ -9010,7 +9024,7 @@ packages:
     resolution: {integrity: sha512-ZRwKbh/eQ6w9vmTjkuG0Ioi3HBwPFce0O+v//ve+aOq1oeCy7jMV2qzzAlpsNuqpqCBjjriM1lbtZbF/Q8jVyA==}
     dev: false
 
-  /sass-loader/12.6.0_webpack@5.74.0:
+  /sass-loader/12.6.0_sass@1.56.2+webpack@5.74.0:
     resolution: {integrity: sha512-oLTaH0YCtX4cfnJZxKSLAyglED0naiYfNG1iXfU5w1LNZ+ukoA5DtyDIN5zmKVZwYNJP4KRc5Y3hkWga+7tYfA==}
     engines: {node: '>= 12.13.0'}
     peerDependencies:
@@ -9031,7 +9045,18 @@ packages:
     dependencies:
       klona: 2.0.5
       neo-async: 2.6.2
+      sass: 1.56.2
       webpack: 5.74.0
+    dev: false
+
+  /sass/1.56.2:
+    resolution: {integrity: sha512-ciEJhnyCRwzlBCB+h5cCPM6ie/6f8HrhZMQOf5vlU60Y1bI1rx5Zb0vlDZvaycHsg/MqFfF1Eq2eokAa32iw8w==}
+    engines: {node: '>=12.0.0'}
+    hasBin: true
+    dependencies:
+      chokidar: 3.5.3
+      immutable: 4.1.0
+      source-map-js: 1.0.2
     dev: false
 
   /sax/1.1.4:
