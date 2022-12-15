@@ -1,0 +1,31 @@
+@media print {
+    .dont-print {
+            display: none;
+        }
+}
+
+
+
+.row:nth-child(even) {
+    background-color: var(--ion-color-light);
+}
+
+.header {
+    background-color: var(--ion-color-primary);
+    color: var(--ion-text-color)
+}
+
+.col {
+    border: solid 1px grey;
+    border-bottom-style: none;
+    border-right-style: none;
+        height: auto;
+}
+
+.col:last-child {
+    border-right: solid 1px grey;
+}
+
+.row:last-child .col {
+    border-bottom: solid 1px grey;
+}

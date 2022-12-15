@@ -1,4 +1,5 @@
 import { Route } from "react-router-dom";
+import "./app.scss";
 import {
   IonApp,
   IonIcon,
@@ -14,6 +15,7 @@ import { ellipse, square, triangle } from "ionicons/icons";
 import AddDevicePage from "./pages/AddDevice";
 import LoginPage from "./pages/Login";
 import SearchPage from "./pages/Search";
+import PrintReport from "./pages/PrintReport";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -33,8 +35,11 @@ import "@ionic/react/css/display.css";
 
 /* Theme variables */
 import "./theme/variables.css";
+import { UserProvider } from "./context/UserContext";
 
 setupIonicReact();
+
+export const apiUrl = "http://localhost:3000";
 
 const tabs = [
   {
@@ -57,26 +62,43 @@ const tabs = [
   },
 ];
 
+const hiddenPages = [
+  {
+    label: "Print Report",
+    slug: "report",
+    icon: square,
+    element: <PrintReport />,
+  },
+];
+
 export default function App() {
   return (
-    <IonApp>
-      <IonReactRouter>
-        <IonTabs>
-          <IonRouterOutlet>
-            {tabs.map((tab) => (
-              <Route key={tab.slug} path={`/${tab.slug}`}>{tab.element}</Route>
-            ))}
-          </IonRouterOutlet>
-          <IonTabBar slot="bottom">
-            {tabs.map((tab) => (
-              <IonTabButton key={tab.slug} tab={tab.slug} href={`/${tab.slug}`}>
-                <IonIcon icon={tab.icon} />
-                <IonLabel>{tab.label}</IonLabel>
-              </IonTabButton>
-            ))}
-          </IonTabBar>
-        </IonTabs>
-      </IonReactRouter>
-    </IonApp>
+    <UserProvider>
+      <IonApp>
+        <IonReactRouter>
+          <IonTabs>
+            <IonRouterOutlet>
+              {[...tabs, ...hiddenPages].map((tab) => (
+                <Route key={tab.slug} path={`/${tab.slug}`}>
+                  {tab.element}
+                </Route>
+              ))}
+            </IonRouterOutlet>
+            <IonTabBar slot="bottom" className="dont-print">
+              {tabs.map((tab) => (
+                <IonTabButton
+                  key={tab.slug}
+                  tab={tab.slug}
+                  href={`/${tab.slug}`}
+                >
+                  <IonIcon icon={tab.icon} />
+                  <IonLabel>{tab.label}</IonLabel>
+                </IonTabButton>
+              ))}
+            </IonTabBar>
+          </IonTabs>
+        </IonReactRouter>
+      </IonApp>
+    </UserProvider>
   );
 }

@@ -12,60 +12,85 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import React, { useState } from "react";
-
-const user = {
-  username: "Kiara",
-};
+import React, { useEffect, useState } from "react";
+import { apiUrl } from "../App";
+import { useUserCtx } from "../context/UserContext";
+import useData, { usePaymentMethods, useItemTypes } from "../utils/useData";
+import { ItemType, PaymentMethod } from "../utils/types";
 
 export default function AddDevicePage() {
+  const { data: itemTypes } = useItemTypes();
+  const { data: paymentMethods } = usePaymentMethods();
+
+  const { user } = useUserCtx();
+
   const inputs = [
     {
-      key: "name",
+      key: "userID",
+      label: "Cashier",
+      placeholder: "Username of cashier adding the device",
+      state: useState<number>(user?.id ?? 1 ?? 0),
+    },
+    {
+      key: "ownerName",
       label: "Client Name",
       placeholder: "Enter name",
       state: useState<string>(""),
     },
     {
-      key: "phone",
+      key: "ownerPhoneNumber",
       label: "Phone Number",
       placeholder: "Enter name",
       state: useState<string>(""),
     },
     {
-      key: "device",
-      label: "Device Type",
-      placeholder: "Type of the device",
+      key: "itemTypeID",
+      label: "Item Type",
+      placeholder: "Type of the item",
+      state: useState<number>(0),
+      options: itemTypes
+        ? itemTypes.map((option) => ({
+            value: option.id,
+            label: option.name,
+          }))
+        : [],
+    },
+    {
+      key: "comments",
+      label: "Comments",
+      placeholder: "Enter comments",
       state: useState<string>(""),
-      options: ["android", "apple", "other"].map((option) => ({
-        label: option,
-        value: option,
-      })),
     },
     {
-      key: "desc",
-      label: "Description",
-      placeholder: "Enter description of the device",
-      state: useState<string>(""),
-    },
-    {
-      key: "cashier",
-      label: "Cashier",
-      placeholder: "Username of cashier adding the device",
-      state: useState<string>(user.username),
-    },
-    {
-      key: "location",
+      key: "storageLocation",
       label: "Location",
       placeholder: "Enter Location",
       state: useState<string>(""),
+    },
+    {
+      key: "storageLocation",
+      label: "Location",
+      placeholder: "Enter Location",
+      state: useState<string>(""),
+    },
+    {
+      key: "paymentMethod",
+      label: "Payment Method",
+      placeholder: "Payment Method",
+      state: useState<number>(0),
+      options: paymentMethods
+        ? paymentMethods.map((option) => ({
+            value: option.id,
+            label: option.name,
+          }))
+        : [],
     },
   ];
 
   const handleAddDevice = async (
     event: React.MouseEvent<HTMLIonButtonElement>
   ) => {
-    const url = `${process.env.API ?? ""}/addDevice`;
+    const url = `${apiUrl}/items/add`;
     let args = Object.assign(
       {},
       ...inputs.map((input) => ({ [input.key]: input.state[0] }))
@@ -74,6 +99,10 @@ export default function AddDevicePage() {
 
     const response = await fetch(url, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
       body: JSON.stringify(args),
     });
     console.log(response);
@@ -114,7 +143,7 @@ function InputItem({
   label: string;
   placeholder: string;
   state: [any, React.Dispatch<React.SetStateAction<any>>];
-  options?: { label: string; value: string }[];
+  options?: { label: string; value: number }[];
 }) {
   const [value, setValue] = state;
 
@@ -128,7 +157,7 @@ function InputItem({
         <IonSelect
           value={value}
           onIonChange={handleChange}
-          placeholder="Select device type"
+          placeholder={placeholder}
         >
           {options.map((option) => (
             <IonSelectOption key={option.value} value={option.value}>
