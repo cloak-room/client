@@ -133,7 +133,7 @@ export default function AddDevicePage() {
 
   return (
     <IonPage>
-      <Header title={"Add Device"} />
+      <Header backButton title={"Add Device"} />
       <IonContent fullscreen>
         <main>
           <IonList>
