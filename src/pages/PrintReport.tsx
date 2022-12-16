@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
 import _ from "lodash";
-import { useDaily, useItemTypes, usePaymentMethods } from "../utils/useData";
+import { useDaily, usePaymentMethods } from "../utils/useData";
 import { PaymentMethod, Item } from "../utils/types";
 
-import { IonButton } from "@ionic/react";
+import { IonButton, IonContent, IonPage } from "@ionic/react";
+import Header from "../components/Header";
 export default function PrintReport() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -16,15 +16,20 @@ export default function PrintReport() {
   }
 
   return (
-    <div>
-      <div>Sales Today: {dailyItems.data?.length}</div>
-      {paymentMethods.data?.map((x) => (
-        <Sale key={x.id} method={x} dailyItems={dailyItems.data} />
-      ))}
-      <IonButton className="dont-print" onClick={() => window.print()}>
-        Print
-      </IonButton>
-    </div>
+    <IonPage>
+      <Header title={"Print Report"} />
+      <IonContent fullscreen>
+        <main>
+          <div>Sales Today: {dailyItems.data?.length}</div>
+          {paymentMethods.data?.map((x) => (
+            <Sale key={x.id} method={x} dailyItems={dailyItems.data} />
+          ))}
+          <IonButton className="dont-print" onClick={() => window.print()}>
+            Print
+          </IonButton>
+        </main>
+      </IonContent>
+    </IonPage>
   );
 }
 

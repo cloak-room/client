@@ -10,11 +10,13 @@ import {
   IonRadioGroup,
   IonTitle,
   IonToolbar,
+  useIonToast,
 } from "@ionic/react";
 import React, { useState } from "react";
 import { apiUrl } from "../App";
 import { User, useUserCtx } from "../context/UserContext";
 import useData from "../utils/useData";
+import { useHistory } from "react-router-dom";
 
 async function getUsers() {
   const url = `${apiUrl}/users`;
@@ -30,6 +32,9 @@ async function getUsers() {
 export default function LoginPage() {
   const { data: users, loading, error } = useData<User[]>(getUsers);
   const { setUser } = useUserCtx();
+  const [presentToast] = useIonToast();
+  const history = useHistory();
+
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>(""); // For later
 
@@ -39,7 +44,35 @@ export default function LoginPage() {
 
     if (selected) {
       setUser(selected);
-      console.log('logged in', selected)
+      console.log("logged in", selected);
+
+      presentToast({
+        message: "Login Successful",
+        color: "success",
+        position: "top",
+        duration: 3000,
+        buttons: [
+          {
+            text: "Dismiss",
+            role: "cancel",
+          },
+        ],
+      });
+      
+      history.push("/search");
+    } else {
+      presentToast({
+        message: `You must select a user`,
+        color: "danger",
+        position: "top",
+        duration: 3000,
+        buttons: [
+          {
+            text: "Dismiss",
+            role: "cancel",
+          },
+        ],
+      });
     }
     return;
     const url = `${process.env.API ?? ""}/login`;

@@ -1,7 +1,6 @@
 import {
   IonButton,
   IonContent,
-  IonHeader,
   IonInput,
   IonItem,
   IonLabel,
@@ -9,24 +8,26 @@ import {
   IonPage,
   IonSelect,
   IonSelectOption,
-  IonTitle,
-  IonToolbar,
+  useIonToast,
 } from "@ionic/react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { apiUrl } from "../App";
 import { useUserCtx } from "../context/UserContext";
-import useData, { usePaymentMethods, useItemTypes } from "../utils/useData";
-import { ItemType, PaymentMethod } from "../utils/types";
+import { usePaymentMethods, useItemTypes } from "../utils/useData";
+import Header from "../components/Header";
+import { Redirect } from "react-router";
 
 export default function AddDevicePage() {
   const { data: itemTypes } = useItemTypes();
   const { data: paymentMethods } = usePaymentMethods();
+  const [presentToast] = useIonToast();
 
   const { user } = useUserCtx();
 
   const inputs = [
     {
       key: "userID",
+      hidden: true,
       label: "Cashier",
       placeholder: "Username of cashier adding the device",
       state: useState<number>(user?.id ?? 1 ?? 0),
@@ -68,12 +69,6 @@ export default function AddDevicePage() {
       state: useState<string>(""),
     },
     {
-      key: "storageLocation",
-      label: "Location",
-      placeholder: "Enter Location",
-      state: useState<string>(""),
-    },
-    {
       key: "paymentMethod",
       label: "Payment Method",
       placeholder: "Payment Method",
@@ -105,22 +100,29 @@ export default function AddDevicePage() {
       },
       body: JSON.stringify(args),
     });
-    console.log(response);
+
+    console.log("response", response);
+    const { error, message } = await response.json();
+
+    presentToast({
+      message: `${message}`,
+      color: error ? "danger" : "success",
+      position: "top",
+      duration: 3000,
+      buttons: [
+        {
+          text: "Dismiss",
+          role: "cancel",
+        },
+      ],
+    });
   };
+  if (!user) return <Redirect to={"/login"} />;
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Add Device</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+      <Header title={"Add Device"} />
       <IonContent fullscreen>
-        <IonHeader collapse="condense">
-          <IonToolbar>
-            <IonTitle size="large">Add Device</IonTitle>
-          </IonToolbar>
-        </IonHeader>
         <main>
           <IonList>
             {inputs.map((input) => (
@@ -136,11 +138,13 @@ export default function AddDevicePage() {
 
 function InputItem({
   label,
+  hidden,
   placeholder,
   state,
   options,
 }: {
   label: string;
+  hidden?: boolean;
   placeholder: string;
   state: [any, React.Dispatch<React.SetStateAction<any>>];
   options?: { label: string; value: number }[];
@@ -150,7 +154,7 @@ function InputItem({
   const handleChange = (event: Event) =>
     setValue((event.target as HTMLInputElement).value);
 
-  return (
+  return hidden ? null : (
     <IonItem>
       <IonLabel>{label}</IonLabel>
       {options ? (

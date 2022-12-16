@@ -2,12 +2,9 @@ import {
   IonCol,
   IonContent,
   IonGrid,
-  IonHeader,
   IonPage,
   IonRow,
   IonSearchbar,
-  IonTitle,
-  IonToolbar,
   SearchbarCustomEvent,
 } from "@ionic/react";
 
@@ -15,6 +12,7 @@ import { useState } from "react";
 import { useItems } from "../utils/useData";
 
 import { Item } from "../utils/types";
+import Header from "../components/Header";
 
 export default function SearchPage() {
   const [search, setSearch] = useState<string | undefined>("");
@@ -28,17 +26,8 @@ export default function SearchPage() {
   console.log(search);
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Search</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+      <Header title="Search" />
       <IonContent fullscreen>
-        <IonHeader collapse="condense">
-          <IonToolbar>
-            <IonTitle size="large">Search</IonTitle>
-          </IonToolbar>
-        </IonHeader>
         <main>
           <IonSearchbar
             placeholder="Search Device"
