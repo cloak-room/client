@@ -17,6 +17,7 @@ import { apiUrl } from "../App";
 import { User, useUserCtx } from "../context/UserContext";
 import useData from "../utils/useData";
 import { useHistory } from "react-router-dom";
+import Header from "../components/Header";
 
 async function getUsers() {
   const url = `${apiUrl}/users`;
@@ -58,7 +59,6 @@ export default function LoginPage() {
           },
         ],
       });
-      
       history.push("/search");
     } else {
       presentToast({
@@ -88,11 +88,7 @@ export default function LoginPage() {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Login</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+      <Header title='Login' backButton />
       <IonContent fullscreen>
         <IonHeader collapse="condense">
           <IonToolbar>

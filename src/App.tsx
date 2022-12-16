@@ -51,7 +51,7 @@ interface Page {
   icon?: any;
 }
 
-const tabs: Page[] = [
+const standardPages: Page[] = [
   {
     label: "Add",
     slug: "addDevice",
@@ -64,9 +64,6 @@ const tabs: Page[] = [
     icon: square,
     element: <SearchPage />,
   },
-];
-
-const hiddenPages: Page[] = [
   {
     label: "Login",
     slug: "login",
@@ -79,6 +76,9 @@ const hiddenPages: Page[] = [
     icon: ellipse,
     element: <Logout />,
   },
+];
+
+const tabPages: Page[] = [
   {
     label: "Print Report",
     slug: "report",
@@ -100,23 +100,15 @@ export default function App() {
 }
 
 function Tabs() {
-  const { user, setUser } = useUserCtx();
-  const [presentToast] = useIonToast();
-  const history = useHistory();
+  const { user } = useUserCtx();
 
   return (
-    <IonTabs>
+    <>
       <IonRouterOutlet>
-        {!user ? (
-          <Route exact path="/">
-            <Redirect to={"/login"} />
-          </Route>
-        ) : (
-          <Route exact path="/">
-            <Redirect to={"/search"} />
-          </Route>
-        )}
-        {[...tabs, ...hiddenPages].map((tab) => (
+        <Route exact path="/">
+          <Redirect to={"/search"} />
+        </Route>
+        {[...standardPages, ...tabPages].map((tab) => (
           <Route
             exact={tab?.exact ?? false}
             key={tab.slug}
@@ -126,20 +118,33 @@ function Tabs() {
           </Route>
         ))}
       </IonRouterOutlet>
-      <IonTabBar slot="bottom" className="dont-print">
-        {tabs.map((tab) => (
-          <IonTabButton key={tab.slug} tab={tab.slug} href={`/${tab.slug}`}>
-            <IonIcon icon={tab.icon} />
-            <IonLabel>{tab.label}</IonLabel>
-          </IonTabButton>
-        ))}
-      </IonTabBar>
-    </IonTabs>
+      {/* <IonTabs>
+        <IonRouterOutlet>
+          {tabPages.map((tab) => (
+            <Route
+              exact={tab?.exact ?? false}
+              key={tab.slug}
+              path={`/${tab.slug}`}
+            >
+              {tab.element}
+            </Route>
+          ))}
+        </IonRouterOutlet>
+        <IonTabBar slot="bottom" className="dont-print">
+          {tabPages.map((tab) => (
+            <IonTabButton key={tab.slug} tab={tab.slug} href={`/${tab.slug}`}>
+              <IonIcon icon={tab.icon} />
+              <IonLabel>{tab.label}</IonLabel>
+            </IonTabButton>
+          ))}
+        </IonTabBar>
+      </IonTabs> */}
+    </>
   );
 }
 
 function Logout() {
-  const { user, setUser } = useUserCtx();
+  const { setUser } = useUserCtx();
   const [presentToast] = useIonToast();
   const history = useHistory();
 
@@ -159,7 +164,7 @@ function Logout() {
       ],
     });
 
-    history.push("/login");
+    history.push("/search");
   };
 
   handleLogout();

@@ -9,6 +9,10 @@ import {
   IonButton,
   useIonToast,
   IonChip,
+  IonFab,
+  IonFabButton,
+  IonIcon,
+  IonToolbar,
 } from "@ionic/react";
 
 import { useState } from "react";
@@ -17,8 +21,12 @@ import { useItems } from "../utils/useData";
 import { Item } from "../utils/types";
 import Header from "../components/Header";
 import { apiUrl } from "../App";
+import { add } from "ionicons/icons";
+import { Link } from "react-router-dom";
+import { useUserCtx } from "../context/UserContext";
 
 export default function SearchPage() {
+  const { user } = useUserCtx();
   const [presentToast] = useIonToast();
   const [search, setSearch] = useState<string | undefined>("");
   const [t, setT] = useState<NodeJS.Timeout>();
@@ -29,7 +37,7 @@ export default function SearchPage() {
     setT(setTimeout(() => setSearch(e.detail.value), 500));
   };
 
-  const handleCollect = async (item: Item) => {
+  const handleCollect = async (item: Item, reset: boolean = false) => {
     const url = `${apiUrl}/items/collect`;
     console.log("collect", item);
 
@@ -39,7 +47,7 @@ export default function SearchPage() {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      body: JSON.stringify({ id: item.id }),
+      body: JSON.stringify({ id: item.id, reset }),
     });
 
     console.log("response", response);
@@ -60,7 +68,7 @@ export default function SearchPage() {
     });
   };
 
-  const handleRefund = async (item: Item) => {
+  const handleRefund = async (item: Item, reset: boolean = false) => {
     const url = `${apiUrl}/items/refund`;
     console.log("refund", item);
 
@@ -70,7 +78,7 @@ export default function SearchPage() {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      body: JSON.stringify({ id: item.id }),
+      body: JSON.stringify({ id: item.id, reset }),
     });
 
     console.log("response", response);
@@ -108,14 +116,25 @@ export default function SearchPage() {
                 { item: "ownerPhoneNumber", label: "Phone #" },
                 { item: "storageLocation", label: "Location" },
                 { item: "comments", label: "Comments" },
-                { item: "actions", label: "Actions" },
+                ...(user ? [{ item: "actions", label: "Actions" }] : []),
               ],
               ...items,
               functions: { handleCollect, handleRefund },
             }}
           />
         </main>
+        {/* Empty toolbar to leave space for FAB */}
+        <IonToolbar />
       </IonContent>
+      {user && (
+        <IonFab horizontal="end" vertical="bottom">
+          <Link to="addDevice">
+            <IonFabButton>
+              <IonIcon icon={add}></IonIcon>
+            </IonFabButton>
+          </Link>
+        </IonFab>
+      )}
     </IonPage>
   );
 }
@@ -151,24 +170,28 @@ function Table({
             <IonCol key={col.item}>
               {col.item === "actions" ? (
                 <div>
-                  {item.refunded ? null : (
-                    // <IonChip color="success">Refunded: {item.refunded}</IonChip>
-                    <IonButton
-                      color="danger"
-                      onClick={() => functions.handleRefund(item)}
-                    >
-                      Refund
-                    </IonButton>
-                  )}
-                  {item.collected ? null : (
-                    // <IonChip color="success">Collected</IonChip>
-                    <IonButton
-                      color="success"
-                      onClick={() => functions.handleCollect(item)}
-                    >
-                      Collect
-                    </IonButton>
-                  )}
+                  <IonButton
+                    size="small"
+                    shape="round"
+                    color="danger"
+                    fill={item.refunded ? "outline" : "solid"}
+                    onClick={() =>
+                      functions.handleRefund(item, item.refunded as boolean)
+                    }
+                  >
+                    Refund{item.refunded && "ed"}
+                  </IonButton>
+                  <IonButton
+                    size="small"
+                    shape="round"
+                    color="success"
+                    fill={item.refunded ? "outline" : "solid"}
+                    onClick={() =>
+                      functions.handleCollect(item, item.collected as boolean)
+                    }
+                  >
+                    Collect{item.refunded && "ed"}
+                  </IonButton>
                 </div>
               ) : (
                 item[col.item] ?? <p>N / A</p>
