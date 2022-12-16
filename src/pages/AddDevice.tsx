@@ -30,7 +30,7 @@ export default function AddDevicePage() {
       hidden: true,
       label: "Cashier",
       placeholder: "Username of cashier adding the device",
-      state: useState<number>(user?.id ?? 1 ?? 0),
+      state: useState<number>(user?.id ?? 0),
     },
     {
       key: "ownerName",
@@ -104,6 +104,18 @@ export default function AddDevicePage() {
     console.log("response", response);
     const { error, message } = await response.json();
 
+    // If item added successfully
+    if (!error) {
+      // Clear inputs
+      inputs.forEach((input) => {
+        const [value, setValue] = input.state;
+        const inputType = typeof value;
+        const defaultValue: any = inputType === "string" ? "" : 0;
+        setValue(defaultValue);
+      });
+    }
+
+    // Error or success message using message from the backend
     presentToast({
       message: `${message}`,
       color: error ? "danger" : "success",
@@ -128,7 +140,9 @@ export default function AddDevicePage() {
             {inputs.map((input) => (
               <InputItem {...input} />
             ))}
-            <IonButton onClick={handleAddDevice}>Submit</IonButton>
+            <IonButton onClick={handleAddDevice} expand="full">
+              Submit
+            </IonButton>
           </IonList>
         </main>
       </IonContent>
