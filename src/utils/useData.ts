@@ -70,7 +70,15 @@ async function getItems(
     `${apiUrl}/items?${searchToken}${startToken}${endToken}`
   );
 
-  return await res.json();
+  const data = await res.json();
+
+  data.sort((a: Item, b: Item) => {
+    var textA = a.ownerName.toUpperCase();
+    var textB = b.ownerName.toUpperCase();
+    return textA < textB ? -1 : textA > textB ? 1 : 0;
+  });
+
+  return data;
 }
 
 async function getPaymentMethods() {
@@ -102,6 +110,9 @@ export function useItems(
   const [data, setData] = useState<Item[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(false);
+  const [r, setR] = useState(true);
+
+  const refresh = (): void => setR((o) => !o);
 
   useEffect(() => {
     (async () => {
@@ -114,7 +125,7 @@ export function useItems(
         setError(err);
       }
     })();
-  }, [search, start, end]);
+  }, [search, start, end, r]);
 
-  return { data, loading, error };
+  return { data, loading, error, refresh };
 }
