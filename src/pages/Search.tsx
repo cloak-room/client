@@ -13,6 +13,12 @@ import {
   IonFabButton,
   IonIcon,
   IonToolbar,
+  IonAccordion,
+  IonItem,
+  IonLabel,
+  IonAccordionGroup,
+  IonCheckbox,
+  CheckboxCustomEvent,
 } from "@ionic/react";
 
 import { useState } from "react";
@@ -28,13 +34,21 @@ import { useUserCtx } from "../context/UserContext";
 export default function SearchPage() {
   const { user } = useUserCtx();
   const [presentToast] = useIonToast();
+
   const [search, setSearch] = useState<string | undefined>("");
+  const [showCollected, setShowCollected] = useState(false);
+
   const [t, setT] = useState<NodeJS.Timeout>();
   const items = useItems(search);
 
   const handleChange = (e: SearchbarCustomEvent) => {
     clearTimeout(t);
     setT(setTimeout(() => setSearch(e.detail.value), 500));
+  };
+
+  const handleShowCollected = (e: CheckboxCustomEvent) => {
+    setShowCollected(e.detail.checked);
+    console.log(e.detail.checked);
   };
 
   const handleCollect = async (item: Item, reset: boolean = false) => {
@@ -52,6 +66,8 @@ export default function SearchPage() {
 
     console.log("response", response);
     const { error, message } = await response.json();
+
+    items.refresh();
 
     // Error or success message using message from the backend
     presentToast({
@@ -81,9 +97,9 @@ export default function SearchPage() {
       body: JSON.stringify({ id: item.id, reset }),
     });
 
-    console.log("response", response);
     const { error, message } = await response.json();
 
+    items.refresh();
     // Error or success message using message from the backend
     presentToast({
       message: `${message}`,
@@ -98,8 +114,6 @@ export default function SearchPage() {
       ],
     });
   };
-
-  console.log(search);
   return (
     <IonPage>
       <Header title="Search" />
@@ -109,6 +123,24 @@ export default function SearchPage() {
             placeholder="Search Device"
             onIonChange={handleChange}
           ></IonSearchbar>
+          <IonAccordionGroup>
+            <IonAccordion value="first">
+              <IonItem slot="header" color="light">
+                <IonLabel>More Options</IonLabel>
+              </IonItem>
+              <div slot="content">
+                <IonItem>
+                  <IonCheckbox
+                    slot="start"
+                    indeterminate={showCollected}
+                    onIonChange={handleShowCollected}
+                  ></IonCheckbox>
+                  <IonLabel>Show Collected</IonLabel>
+                </IonItem>
+              </div>
+            </IonAccordion>
+          </IonAccordionGroup>
+
           <Table
             {...{
               columns: [
@@ -118,7 +150,12 @@ export default function SearchPage() {
                 { item: "comments", label: "Comments" },
                 ...(user ? [{ item: "actions", label: "Actions" }] : []),
               ],
-              ...items,
+              ...{
+                ...items,
+                data: !showCollected
+                  ? items?.data?.filter((x) => x.collected == null)
+                  : items.data,
+              },
               functions: { handleCollect, handleRefund },
             }}
           />
@@ -147,7 +184,7 @@ function Table({
   functions,
 }: {
   columns: { item: string; label: string }[];
-  data: Item[] | null;
+  data?: Item[] | null;
   loading: boolean;
   error: Error;
   functions: any;
@@ -185,12 +222,12 @@ function Table({
                     size="small"
                     shape="round"
                     color="success"
-                    fill={item.refunded ? "outline" : "solid"}
+                    fill={item.collected ? "outline" : "solid"}
                     onClick={() =>
                       functions.handleCollect(item, item.collected as boolean)
                     }
                   >
-                    Collect{item.refunded && "ed"}
+                    Collect{item.collected && "ed"}
                   </IonButton>
                 </div>
               ) : (
