@@ -41,7 +41,7 @@ import { UserProvider } from "./context/UserContext";
 
 setupIonicReact();
 
-export const apiUrl = "http://localhost:3000";
+export const apiUrl = "http://192.168.0.235:3000";
 
 interface Page {
   label: string;

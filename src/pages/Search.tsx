@@ -19,9 +19,12 @@ import {
   IonAccordionGroup,
   IonCheckbox,
   CheckboxCustomEvent,
+  IonDatetime,
+  DatetimeChangeEventDetail,
+  DatetimeCustomEvent,
 } from "@ionic/react";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useItems } from "../utils/useData";
 
 import { Item } from "../utils/types";
@@ -30,6 +33,11 @@ import { apiUrl } from "../App";
 import { add } from "ionicons/icons";
 import { Link } from "react-router-dom";
 import { useUserCtx } from "../context/UserContext";
+import { deleteDatabase } from "workbox-core/_private";
+
+function toLocalDateString(d: Date) {
+  return d.toLocaleString("en-AU").slice(0, 10).split("/").reverse().join("-");
+}
 
 export default function SearchPage() {
   const { user } = useUserCtx();
@@ -38,8 +46,21 @@ export default function SearchPage() {
   const [search, setSearch] = useState<string | undefined>("");
   const [showCollected, setShowCollected] = useState(false);
 
+  const datetime = useRef<null | HTMLIonDatetimeElement>(null);
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  useEffect(() => {
+    if (!datetime.current) return;
+
+    const today = toLocalDateString(new Date());
+
+    console.log(today);
+    datetime.current.value = [today];
+    handleStartAndEndDate([today]);
+  }, []);
+
   const [t, setT] = useState<NodeJS.Timeout>();
-  const items = useItems(search);
+  const items = useItems(search, startDate, endDate);
 
   const handleChange = (e: SearchbarCustomEvent) => {
     clearTimeout(t);
@@ -49,6 +70,30 @@ export default function SearchPage() {
   const handleShowCollected = (e: CheckboxCustomEvent) => {
     setShowCollected(e.detail.checked);
     console.log(e.detail.checked);
+  };
+
+  const handleStartAndEndDate = (value: string[]) => {
+    const dates = value.map((x) => new Date(x));
+
+    dates.sort((a, b) => a.getTime() - b.getTime());
+
+    const start = dates[0];
+    start.setHours(0, 0, 0, 0);
+    setStartDate(start.toISOString());
+
+    const end = dates[dates.length - 1];
+    end.setHours(23, 59, 0, 0);
+    setEndDate(end.toISOString());
+  };
+
+  const handleDate = (e: DatetimeCustomEvent) => {
+    if (typeof e.target.value == "string" || e.target.value == null) {
+      setStartDate("");
+      setEndDate("");
+      return;
+    }
+    handleStartAndEndDate(e.target.value);
+    //items.refresh();
   };
 
   const handleCollect = async (item: Item, reset: boolean = false) => {
@@ -137,6 +182,12 @@ export default function SearchPage() {
                   ></IonCheckbox>
                   <IonLabel>Show Collected</IonLabel>
                 </IonItem>
+                <IonDatetime
+                  ref={datetime}
+                  presentation="date"
+                  multiple={true}
+                  onIonChange={handleDate}
+                ></IonDatetime>
               </div>
             </IonAccordion>
           </IonAccordionGroup>

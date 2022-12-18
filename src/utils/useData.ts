@@ -59,12 +59,12 @@ async function getItems(
   end: string = ""
 ) {
   console.log(search);
-  const startTime = new Date(start);
-  const endTime = new Date(end);
+  // const startTime = new Date(start);
+  // const endTime = new Date(end);
 
   const searchToken = search === "" ? "" : `q=${search}&`;
-  const startToken = start === "" ? "" : `from=${startTime.toISOString()}&`;
-  const endToken = end === "" ? "" : `&to=${endTime.toISOString()}`;
+  const startToken = start === "" ? "" : `from=${start}&`;
+  const endToken = end === "" ? "" : `to=${end}&`;
 
   const res = await fetch(
     `${apiUrl}/items?${searchToken}${startToken}${endToken}`
