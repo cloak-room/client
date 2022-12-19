@@ -17,7 +17,9 @@ const defaultContext = { user: null, setUser: () => {} };
 const UserContext = React.createContext<ContextProps>(defaultContext);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  let userStorage = window.localStorage.getItem("user");
+  const savedUser: User = userStorage ? JSON.parse(userStorage) : null;
+  const [user, setUser] = useState<User | null>(savedUser ?? null);
 
   return (
     <UserContext.Provider value={{ user, setUser }}>

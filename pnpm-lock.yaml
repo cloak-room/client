@@ -22,6 +22,7 @@ specifiers:
   dotenv: ^16.0.3
   ionicons: ^6.0.3
   lodash: ^4.17.21
+  polished: ^4.2.2
   react: ^18.2.0
   react-dom: ^18.2.0
   react-router: ^5.2.0
@@ -64,6 +65,7 @@ dependencies:
   dotenv: 16.0.3
   ionicons: 6.0.3
   lodash: 4.17.21
+  polished: 4.2.2
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
   react-router: 5.3.4_react@18.2.0
@@ -7624,6 +7626,13 @@ packages:
       base64-js: 1.5.1
       xmlbuilder: 15.1.1
     dev: true
+
+  /polished/4.2.2:
+    resolution: {integrity: sha512-Sz2Lkdxz6F2Pgnpi9U5Ng/WdWAUZxmHrNPoVlm3aAemxoy2Qy7LGjQg4uf8qKelDAUW94F4np3iH2YPf2qefcQ==}
+    engines: {node: '>=10'}
+    dependencies:
+      '@babel/runtime': 7.19.4
+    dev: false
 
   /postcss-attribute-case-insensitive/5.0.2_postcss@8.4.18:
     resolution: {integrity: sha512-XIidXV8fDr0kKt28vqki84fRK8VW8eTuIa4PChv2MqKuT6C9UjmSKzen6KaWhWEoYvwxFCa7n/tC1SZ3tyq4SQ==}
