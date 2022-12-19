@@ -45,6 +45,7 @@ export default function LoginPage() {
 
     if (selected) {
       setUser(selected);
+      window.localStorage.setItem("user", JSON.stringify(selected));
       console.log("logged in", selected);
 
       presentToast({
@@ -88,7 +89,7 @@ export default function LoginPage() {
 
   return (
     <IonPage>
-      <Header title='Login' backButton />
+      <Header title="Login" backButton />
       <IonContent fullscreen>
         <IonHeader collapse="condense">
           <IonToolbar>

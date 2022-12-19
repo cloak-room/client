@@ -22,7 +22,10 @@ import {
   IonDatetime,
   DatetimeChangeEventDetail,
   DatetimeCustomEvent,
+  IonList,
 } from "@ionic/react";
+
+import { setLightness } from "polished";
 
 import { useEffect, useRef, useState } from "react";
 import { useItems } from "../utils/useData";
@@ -31,7 +34,7 @@ import { Item } from "../utils/types";
 import Header from "../components/Header";
 import { apiUrl } from "../App";
 import { add } from "ionicons/icons";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useUserCtx } from "../context/UserContext";
 import { deleteDatabase } from "workbox-core/_private";
 
@@ -42,6 +45,7 @@ function toLocalDateString(d: Date) {
 export default function SearchPage() {
   const { user } = useUserCtx();
   const [presentToast] = useIonToast();
+  const location = useLocation();
 
   const [search, setSearch] = useState<string | undefined>("");
   const [showCollected, setShowCollected] = useState(false);
@@ -61,6 +65,10 @@ export default function SearchPage() {
 
   const [t, setT] = useState<NodeJS.Timeout>();
   const items = useItems(search, startDate, endDate);
+
+  useEffect(() => {
+    items.refresh();
+  }, [location.key]);
 
   const handleChange = (e: SearchbarCustomEvent) => {
     clearTimeout(t);
@@ -251,43 +259,72 @@ function Table({
           </IonCol>
         ))}
       </IonRow>
-
-      {data?.map((item: any) => (
-        <IonRow className="row" key={item.id}>
-          {columns?.map((col) => (
-            <IonCol key={col.item}>
-              {col.item === "actions" ? (
-                <div>
-                  <IonButton
-                    size="small"
-                    shape="round"
-                    color="danger"
-                    fill={item.refunded ? "outline" : "solid"}
-                    onClick={() =>
-                      functions.handleRefund(item, item.refunded as boolean)
-                    }
-                  >
-                    Refund{item.refunded && "ed"}
-                  </IonButton>
-                  <IonButton
-                    size="small"
-                    shape="round"
-                    color="success"
-                    fill={item.collected ? "outline" : "solid"}
-                    onClick={() =>
-                      functions.handleCollect(item, item.collected as boolean)
-                    }
-                  >
-                    Collect{item.collected && "ed"}
-                  </IonButton>
-                </div>
-              ) : (
-                item[col.item] ?? <p>N / A</p>
-              )}
-            </IonCol>
-          ))}
-        </IonRow>
-      ))}
+      <IonAccordionGroup>
+        {data?.map((item: any) => (
+          <IonAccordion key={item.id} value={`Item-${item.id}`} className="row">
+            <IonRow slot="header" key={item.id}>
+              {columns?.map((col) => (
+                <IonCol key={col.item}>
+                  {col.item === "actions" ? (
+                    <div>
+                      <IonButton
+                        size="small"
+                        shape="round"
+                        color="danger"
+                        fill={item.refunded ? "outline" : "solid"}
+                        onClick={() =>
+                          functions.handleRefund(item, item.refunded as boolean)
+                        }
+                      >
+                        Refund{item.refunded && "ed"}
+                      </IonButton>
+                      <IonButton
+                        size="small"
+                        shape="round"
+                        color="success"
+                        fill={item.collected ? "outline" : "solid"}
+                        onClick={() =>
+                          functions.handleCollect(
+                            item,
+                            item.collected as boolean
+                          )
+                        }
+                      >
+                        Collect{item.collected && "ed"}
+                      </IonButton>
+                    </div>
+                  ) : (
+                    item[col.item] ?? <p>N / A</p>
+                  )}
+                </IonCol>
+              ))}
+            </IonRow>
+            <div slot="content">
+              <IonList class="expandedRowList">
+                {Object.entries(item)?.map(([key, value], index) => (
+                  <IonItem key={key} color={index%2 ? 'medium' : 'light'}>
+                    {key === "user"}
+                    <IonLabel>{`${key}:`}</IonLabel>
+                    <IonLabel>{JSON.stringify(value) ?? <p>N / A</p>}</IonLabel>
+                  </IonItem>
+                ))}
+                <IonItem key="edit" color="medium">
+                  <Link to={`editDevice/${item.id}`}>
+                    <IonButton
+                      size="small"
+                      shape="round"
+                      color="warning"
+                      fill="solid"
+                    >
+                      Edit
+                    </IonButton>
+                  </Link>
+                </IonItem>
+              </IonList>
+            </div>
+          </IonAccordion>
+        ))}
+      </IonAccordionGroup>
     </IonGrid>
   );
 }

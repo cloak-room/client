@@ -11,14 +11,16 @@ import {
   useIonToast,
   useIonAlert,
 } from "@ionic/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { apiUrl } from "../App";
 import { useUserCtx } from "../context/UserContext";
-import { usePaymentMethods, useItemTypes } from "../utils/useData";
+import { usePaymentMethods, useItemTypes, useItems } from "../utils/useData";
 import Header from "../components/Header";
-import { Redirect } from "react-router";
+import { Redirect, useParams } from "react-router";
+import { Item } from "../utils/types";
 
 export default function AddDevicePage() {
+  const { data: items } = useItems();
   const { data: itemTypes } = useItemTypes();
   const { data: paymentMethods } = usePaymentMethods();
   const [presentToast] = useIonToast();
@@ -26,25 +28,32 @@ export default function AddDevicePage() {
   const [presentAlert] = useIonAlert();
 
   const { user } = useUserCtx();
+  const { itemID }: any = useParams();
+  console.log("itemID", itemID);
+  console.log("items", items);
+  const item: Item | null | undefined = itemID
+    ? items?.find((x) => x.id == itemID)
+    : null;
+  console.log("item", item);
 
   const inputs = [
     {
       key: "ownerName",
       label: "Client Name",
       placeholder: "Enter name",
-      state: useState<string>(""),
+      state: useState<string>(item?.ownerName ?? ""),
     },
     {
       key: "ownerPhoneNumber",
       label: "Phone Number",
       placeholder: "Enter name",
-      state: useState<string>(""),
+      state: useState<string>(item?.ownerPhoneNumber ?? ""),
     },
     {
       key: "itemTypeID",
       label: "Item Type",
       placeholder: "Type of the item",
-      state: useState<number>(0),
+      state: useState<number>(item?.itemType.id ?? 0),
       options: itemTypes
         ? itemTypes.map((option) => ({
             value: option.id,
@@ -56,19 +65,19 @@ export default function AddDevicePage() {
       key: "comments",
       label: "Comments",
       placeholder: "Enter comments",
-      state: useState<string>(""),
+      state: useState<string>(item?.comments ?? ""),
     },
     {
       key: "storageLocation",
       label: "Location",
       placeholder: "Enter Location",
-      state: useState<string>(""),
+      state: useState<string>(item?.storageLocation ?? ""),
     },
     {
       key: "paymentMethod",
       label: "Payment Method",
       placeholder: "Payment Method",
-      state: useState<number>(0),
+      state: useState<number>(item?.paymentMethod.id ?? 0),
       options: paymentMethods
         ? paymentMethods.map((option) => ({
             value: option.id,
@@ -78,12 +87,25 @@ export default function AddDevicePage() {
     },
   ];
 
+  useEffect(() => {
+    if (item) {
+      console.log("useEffect", item);
+      inputs.forEach((input) => {
+        const [value, setValue] = input.state;
+        const itemValue = item[input.key];
+        if (itemValue) {
+          setValue(itemValue);
+        }
+      });
+    }
+  }, [items]);
+
   const handleAddDevice = async (
     event: React.MouseEvent<HTMLIonButtonElement>
   ) => {
     const url = `${apiUrl}/items/add`;
     let args = Object.assign(
-      { userId: user?.id },
+      { userId: user?.id, id: item?.id ?? null },
       ...inputs.map((input) => ({ [input.key]: input.state[0] }))
     );
     console.log("send", args);
@@ -152,7 +174,7 @@ export default function AddDevicePage() {
 
   return (
     <IonPage>
-      <Header backButton title={"Add Device"} />
+      <Header backButton title={(itemID ? "Edit" : "Add") + " Device"} />
       <IonContent fullscreen>
         <main>
           <IonList>
