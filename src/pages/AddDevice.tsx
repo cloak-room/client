@@ -92,7 +92,7 @@ export default function AddDevicePage() {
       console.log("useEffect", item);
       inputs.forEach((input) => {
         const [value, setValue] = input.state;
-        const itemValue = item[input.key];
+        const itemValue: any = item[input.key as keyof Item];
         if (itemValue) {
           setValue(itemValue);
         }

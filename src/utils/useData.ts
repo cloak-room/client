@@ -10,6 +10,10 @@ export default function useData<T>(
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(false);
 
+  const [r, setR] = useState(true);
+
+  const refresh = (): void => setR((o) => !o);
+
   useEffect(() => {
     (async () => {
       try {
@@ -21,9 +25,9 @@ export default function useData<T>(
         setError(err);
       }
     })();
-  }, [getData, ...args]);
+  }, [getData, r, ...args]);
 
-  return { data, loading, error };
+  return { data, loading, error, refresh };
 }
 
 async function getItemTypes() {

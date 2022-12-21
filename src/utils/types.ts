@@ -3,10 +3,12 @@ export type Item = {
   ownerName: string;
   ownerPhoneNumber: string;
   comments: string;
-  collected: boolean;
-  createdAt: Date;
+  collected: string | null;
+  createdAt: string;
+  refunded: string | null;
   user: User;
   itemType: ItemType;
+  storageLocation: string;
   paymentMethod: PaymentMethod;
 };
 export type ItemType = {
@@ -20,6 +22,7 @@ export type User = {
   firstName: string;
   lastName: string;
   hash?: string;
+  username: string;
 };
 
 export type PaymentMethod = {
