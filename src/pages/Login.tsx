@@ -12,7 +12,7 @@ import {
   IonToolbar,
   useIonToast,
 } from "@ionic/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { apiUrl } from "../App";
 import { User, useUserCtx } from "../context/UserContext";
 import useData from "../utils/useData";
@@ -31,13 +31,17 @@ async function getUsers() {
 }
 
 export default function LoginPage() {
-  const { data: users, loading, error } = useData<User[]>(getUsers);
+  const { data: users, loading, error, refresh } = useData<User[]>(getUsers);
   const { setUser } = useUserCtx();
   const [presentToast] = useIonToast();
   const history = useHistory();
 
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>(""); // For later
+
+  useEffect(() => {
+    if (error.name == "TypeError") refresh();
+  }, [error]);
 
   const handleLogin = async (event: React.MouseEvent<HTMLIonButtonElement>) => {
     console.log(users);

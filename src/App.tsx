@@ -156,7 +156,7 @@ function Logout() {
 
   const handleLogout = () => {
     setUser(null);
-
+    localStorage.removeItem("user");
     presentToast({
       message: "Logout Successful",
       color: "success",
