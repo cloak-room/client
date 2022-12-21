@@ -10,12 +10,12 @@ import { Link } from "react-router-dom";
 
 import { useUserCtx } from "../context/UserContext";
 
-export default function Header({ title, backButton=false }: any) {
+export default function Header({ title, backButton = false }: any) {
   const { user } = useUserCtx();
 
   return (
-    <IonHeader>
-      <IonToolbar>
+    <IonHeader className="dont-print">
+      <IonToolbar className="dont-print">
         <IonButtons slot="start">{backButton && <IonBackButton />}</IonButtons>
         <IonTitle>{title}</IonTitle>
         <IonButtons slot="end">

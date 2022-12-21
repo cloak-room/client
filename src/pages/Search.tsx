@@ -23,6 +23,8 @@ import {
   DatetimeChangeEventDetail,
   DatetimeCustomEvent,
   IonList,
+  IonCard,
+  IonSpinner,
 } from "@ionic/react";
 
 import { setLightness } from "polished";
@@ -30,7 +32,7 @@ import { setLightness } from "polished";
 import { useEffect, useRef, useState } from "react";
 import { useItems } from "../utils/useData";
 
-import { Item } from "../utils/types";
+import { Item, ItemType, PaymentMethod, User } from "../utils/types";
 import Header from "../components/Header";
 import { apiUrl } from "../App";
 import { add } from "ionicons/icons";
@@ -59,8 +61,8 @@ export default function SearchPage() {
     const today = toLocalDateString(new Date());
 
     console.log(today);
-    datetime.current.value = [today];
-    handleStartAndEndDate([today]);
+    //datetime.current.value = [today];
+    //handleStartAndEndDate([today]);
   }, []);
 
   const [t, setT] = useState<NodeJS.Timeout>();
@@ -69,6 +71,10 @@ export default function SearchPage() {
   useEffect(() => {
     items.refresh();
   }, [location.key]);
+
+  useEffect(() => {
+    if (items.error.name == "TypeError") items.refresh();
+  }, [items.error]);
 
   const handleChange = (e: SearchbarCustomEvent) => {
     clearTimeout(t);
@@ -199,25 +205,86 @@ export default function SearchPage() {
               </div>
             </IonAccordion>
           </IonAccordionGroup>
+          {items.loading ? (
+            <IonSpinner name="circular"></IonSpinner>
+          ) : (
+            <Table
+              {...{
+                columns: [
+                  {
+                    item: "id",
+                    label: "ID",
+                    className: "ion-hide",
+                  },
+                  {
+                    item: "user",
+                    label: "Cashier",
+                    className: "ion-hide",
+                    displayFunction: (x: User) => x.username,
+                  },
+                  { item: "ownerName", label: "Owner", className: "" },
+                  { item: "ownerPhoneNumber", label: "Phone #", className: "" },
+                  { item: "storageLocation", label: "Location", className: "" },
+                  {
+                    item: "itemType",
+                    label: "Type",
+                    className: "ion-hide-sm-down",
+                    displayFunction: (x: ItemType) => x.name,
+                  },
+                  {
+                    item: "itemType",
+                    label: "Price",
+                    className: "ion-hide-sm-down",
+                    displayFunction: (x: ItemType) => `$${x.price / 100}`,
+                  },
+                  {
+                    item: "paymentMethod",
+                    label: "PaymentMethod",
+                    className: "ion-hide-md-down",
+                    displayFunction: (x: PaymentMethod) => x.name,
+                  },
+                  {
+                    item: "comments",
+                    label: "Comments",
+                    className: "ion-hide-md-down",
+                  },
 
-          <Table
-            {...{
-              columns: [
-                { item: "ownerName", label: "Owner" },
-                { item: "ownerPhoneNumber", label: "Phone #" },
-                { item: "storageLocation", label: "Location" },
-                { item: "comments", label: "Comments" },
-                ...(user ? [{ item: "actions", label: "Actions" }] : []),
-              ],
-              ...{
-                ...items,
-                data: !showCollected
-                  ? items?.data?.filter((x) => x.collected == null)
-                  : items.data,
-              },
-              functions: { handleCollect, handleRefund },
-            }}
-          />
+                  {
+                    item: "createdAt",
+                    label: "Dropped Off",
+                    className: "ion-hide",
+                    displayFunction: (x: string) =>
+                      new Date(x).toLocaleString("en-AU"),
+                  },
+                  {
+                    item: "collected",
+                    label: "Collected",
+                    className: "ion-hide",
+                    displayFunction: (x: string) =>
+                      x == null ? "N / A" : new Date(x).toLocaleString("en-AU"),
+                  },
+                  {
+                    item: "refunded",
+                    label: "Refunded",
+                    className: "ion-hide",
+                    displayFunction: (x: string) =>
+                      x == null ? "N / A" : new Date(x).toLocaleString("en-AU"),
+                  },
+
+                  ...(user
+                    ? [{ item: "actions", label: "Actions", className: "" }]
+                    : []),
+                ],
+                ...{
+                  ...items,
+                  data: !showCollected
+                    ? items?.data?.filter((x) => x.collected == null)
+                    : items.data,
+                },
+                functions: { handleCollect, handleRefund },
+              }}
+            />
+          )}
         </main>
         {/* Empty toolbar to leave space for FAB */}
         <IonToolbar />
@@ -242,7 +309,12 @@ function Table({
   error,
   functions,
 }: {
-  columns: { item: string; label: string }[];
+  columns: {
+    item: string;
+    label: string;
+    className: string;
+    displayFunction?: (x: any) => string;
+  }[];
   data?: Item[] | null;
   loading: boolean;
   error: Error;
@@ -254,7 +326,7 @@ function Table({
     <IonGrid>
       <IonRow>
         {columns.map((col) => (
-          <IonCol className="header" key={col.item}>
+          <IonCol className={`header ${col.className}`} key={col.label}>
             {col.label}
           </IonCol>
         ))}
@@ -264,7 +336,7 @@ function Table({
           <IonAccordion key={item.id} value={`Item-${item.id}`} className="row">
             <IonRow slot="header" key={item.id}>
               {columns?.map((col) => (
-                <IonCol key={col.item}>
+                <IonCol key={col.label} className={col.className}>
                   {col.item === "actions" ? (
                     <div>
                       <IonButton
@@ -294,33 +366,44 @@ function Table({
                       </IonButton>
                     </div>
                   ) : (
-                    item[col.item] ?? <p>N / A</p>
+                    (col.displayFunction
+                      ? col.displayFunction(item[col.item])
+                      : item[col.item]) ?? <p>N / A</p>
                   )}
                 </IonCol>
               ))}
             </IonRow>
-            <div slot="content">
-              <IonList class="expandedRowList">
-                {Object.entries(item)?.map(([key, value], index) => (
-                  <IonItem key={key} color={index%2 ? 'medium' : 'light'}>
-                    {key === "user"}
-                    <IonLabel>{`${key}:`}</IonLabel>
-                    <IonLabel>{JSON.stringify(value) ?? <p>N / A</p>}</IonLabel>
-                  </IonItem>
-                ))}
-                <IonItem key="edit" color="medium">
-                  <Link to={`editDevice/${item.id}`}>
-                    <IonButton
-                      size="small"
-                      shape="round"
-                      color="warning"
-                      fill="solid"
+            <div slot="content" className="detail-card">
+              <IonCard>
+                <IonList class="expandedRowList">
+                  {columns?.map((col, index) => (
+                    <IonItem
+                      key={col.label}
+                      color={index % 2 ? "medium" : "light"}
                     >
-                      Edit
-                    </IonButton>
-                  </Link>
-                </IonItem>
-              </IonList>
+                      {/* {key === "user"} */}
+                      <IonLabel>{`${col.label}:`}</IonLabel>
+                      <IonLabel>
+                        {(col.displayFunction
+                          ? col.displayFunction(item[col.item])
+                          : item[col.item]) ?? <p>N / A</p>}
+                      </IonLabel>
+                    </IonItem>
+                  ))}
+                  <IonItem key="edit" color="medium">
+                    <Link to={`editDevice/${item.id}`}>
+                      <IonButton
+                        size="small"
+                        shape="round"
+                        color="warning"
+                        fill="solid"
+                      >
+                        Edit
+                      </IonButton>
+                    </Link>
+                  </IonItem>
+                </IonList>
+              </IonCard>
             </div>
           </IonAccordion>
         ))}
