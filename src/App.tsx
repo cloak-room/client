@@ -41,7 +41,7 @@ import { UserProvider } from "./context/UserContext";
 
 setupIonicReact();
 
-export const apiUrl = "http://192.168.1.125:3000";
+export const apiUrl = "http://localhost:3000";
 
 interface Page {
   label: string;
@@ -110,23 +110,12 @@ function Tabs() {
 
   return (
     <>
-      <IonRouterOutlet>
-        <Route exact path="/">
-          <Redirect to={"/search"} />
-        </Route>
-        {[...standardPages, ...tabPages].map((tab) => (
-          <Route
-            exact={tab?.exact ?? false}
-            key={tab.slug}
-            path={`/${tab.slug}`}
-          >
-            {tab.element}
-          </Route>
-        ))}
-      </IonRouterOutlet>
-      {/* <IonTabs>
+      <IonTabs>
         <IonRouterOutlet>
-          {tabPages.map((tab) => (
+          <Route exact path="/">
+            <Redirect to={"/search"} />
+          </Route>
+          {[...standardPages, ...tabPages].map((tab) => (
             <Route
               exact={tab?.exact ?? false}
               key={tab.slug}
@@ -136,7 +125,13 @@ function Tabs() {
             </Route>
           ))}
         </IonRouterOutlet>
-        <IonTabBar slot="bottom" className="dont-print">
+
+        <IonTabBar
+          slot="bottom"
+          className={`${
+            user?.level && user.level >= 2 ? "" : "ion-hide"
+          } dont-print`}
+        >
           {tabPages.map((tab) => (
             <IonTabButton key={tab.slug} tab={tab.slug} href={`/${tab.slug}`}>
               <IonIcon icon={tab.icon} />
@@ -144,7 +139,7 @@ function Tabs() {
             </IonTabButton>
           ))}
         </IonTabBar>
-      </IonTabs> */}
+      </IonTabs>
     </>
   );
 }

@@ -3,7 +3,10 @@
     display: none;
   }
 }
-
+.sc-ion-alert-md {
+  --max-width: 75%;
+  --width: 50%;
+}
 .detail-card {
   display: flex;
   justify-content: center;
