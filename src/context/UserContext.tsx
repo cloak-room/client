@@ -10,6 +10,7 @@ export interface User {
   username: string;
   firstname: string;
   lastname: string;
+  level: number;
 }
 
 const defaultContext = { user: null, setUser: () => {} };

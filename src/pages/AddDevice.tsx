@@ -11,12 +11,12 @@ import {
   useIonToast,
   useIonAlert,
 } from "@ionic/react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { apiUrl } from "../App";
 import { useUserCtx } from "../context/UserContext";
 import { usePaymentMethods, useItemTypes, useItems } from "../utils/useData";
 import Header from "../components/Header";
-import { Redirect, useParams } from "react-router";
+import { Redirect, useHistory, useParams } from "react-router";
 import { Item } from "../utils/types";
 
 export default function AddDevicePage() {
@@ -24,6 +24,7 @@ export default function AddDevicePage() {
   const { data: itemTypes } = useItemTypes();
   const { data: paymentMethods } = usePaymentMethods();
   const [presentToast] = useIonToast();
+  const history = useHistory();
 
   const [presentAlert] = useIonAlert();
 
@@ -50,15 +51,17 @@ export default function AddDevicePage() {
       state: useState<string>(item?.ownerPhoneNumber ?? ""),
     },
     {
-      key: "itemTypeID",
+      key: "itemType",
       label: "Item Type",
       placeholder: "Type of the item",
-      state: useState<number>(item?.itemType.id ?? 0),
+      state: useState<number>(item?.itemType.id ?? -1),
       options: itemTypes
-        ? itemTypes.map((option) => ({
-            value: option.id,
-            label: option.name,
-          }))
+        ? itemTypes
+            .sort((a, b) => a.price - b.price)
+            .map((option) => ({
+              value: option.id,
+              label: `${option.name}: ($${(option.price / 100).toFixed(2)})`,
+            }))
         : [],
     },
     {
@@ -77,7 +80,7 @@ export default function AddDevicePage() {
       key: "paymentMethod",
       label: "Payment Method",
       placeholder: "Payment Method",
-      state: useState<number>(item?.paymentMethod.id ?? 0),
+      state: useState<number>(item?.paymentMethod.id ?? -1),
       options: paymentMethods
         ? paymentMethods.map((option) => ({
             value: option.id,
@@ -93,12 +96,17 @@ export default function AddDevicePage() {
       inputs.forEach((input) => {
         const [value, setValue] = input.state;
         const itemValue: any = item[input.key as keyof Item];
-        if (itemValue) {
+
+        console.log(itemValue);
+
+        if (typeof itemValue == "object") {
+          setValue(itemValue.id);
+        } else if (itemValue) {
           setValue(itemValue);
         }
       });
     }
-  }, [items]);
+  }, [item]);
 
   const handleAddDevice = async (
     event: React.MouseEvent<HTMLIonButtonElement>
@@ -110,66 +118,78 @@ export default function AddDevicePage() {
     );
     console.log("send", args);
     console.log(itemTypes);
-    presentAlert({
-      header: `Please Collect ${
-        paymentMethods
-          ? paymentMethods.find((x) => x.id === args.paymentMethod)?.name
-          : ""
-      } payment of $${
-        (itemTypes?.find((x) => x.id === args.itemTypeID)?.price ?? 500) / 100
-      } from ${args.ownerName}`,
-      cssClass: "custom-alert",
-      buttons: [
-        {
-          text: "Cancel",
-          cssClass: "alert-button-cancel",
-          handler: () => true,
+
+    const addHandler = async () => {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-        {
-          text: "Confirm",
-          cssClass: "alert-button-confirm",
-          handler: async () => {
-            const response = await fetch(url, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-              },
-              body: JSON.stringify(args),
-            });
+        body: JSON.stringify(args),
+      });
 
-            console.log("response", response);
-            const { error, message } = await response.json();
+      console.log("response", response);
+      const { error, message } = await response.json();
 
-            // If item added successfully
-            if (!error) {
-              // Clear inputs
-              inputs.forEach((input) => {
-                const [value, setValue] = input.state;
-                const inputType = typeof value;
-                const defaultValue: any = inputType === "string" ? "" : 0;
-                setValue(defaultValue);
-              });
-            }
+      // If item added successfully
+      if (!error) {
+        // Clear inputs
+        inputs.forEach((input) => {
+          const [value, setValue] = input.state;
+          const inputType = typeof value;
+          const defaultValue: any = inputType === "string" ? "" : 0;
+          setValue(defaultValue);
+        });
 
-            // Error or success message using message from the backend
-            presentToast({
-              message: `${message}`,
-              color: error ? "danger" : "success",
-              position: "top",
-              duration: 3000,
-              buttons: [
-                {
-                  text: "Dismiss",
-                  role: "cancel",
-                },
-              ],
-            });
+        if (args.id != null) {
+          history.push("/search");
+        }
+      }
+
+      // Error or success message using message from the backend
+      presentToast({
+        message: `${message}`,
+        color: error ? "danger" : "success",
+        position: "top",
+        duration: 3000,
+        buttons: [
+          {
+            text: "Dismiss",
+            role: "cancel",
           },
-        },
-      ],
-    });
+        ],
+      });
+    };
+
+    if (!item) {
+      presentAlert({
+        header: `Please Collect ${
+          paymentMethods
+            ? paymentMethods.find((x) => x.id === args.paymentMethod)?.name
+            : ""
+        } payment of $${
+          (itemTypes?.find((x) => x.id === args.itemTypeID)?.price ?? 500) / 100
+        } from ${args.ownerName}`,
+        cssClass: "custom-alert",
+        buttons: [
+          {
+            text: "Cancel",
+            cssClass: "alert-button-cancel",
+            handler: () => true,
+          },
+          {
+            text: "Confirm",
+            cssClass: "alert-button-confirm",
+            handler: addHandler,
+          },
+        ],
+      });
+    } else {
+      addHandler();
+    }
   };
+
   if (!user) return <Redirect to={"/login"} />;
 
   return (
@@ -209,21 +229,19 @@ function InputItem({
   const handleChange = (event: Event) =>
     setValue((event.target as HTMLInputElement).value);
 
+  // const elem = useRef<null | HTMLIonSelectElement>(null);
+
+  // useEffect(() => {
+  //   if (!elem.current) return;
+
+  //   elem.current.value = 0;
+  // }, [value]);
+
   return hidden ? null : (
     <IonItem>
       <IonLabel>{label}</IonLabel>
       {options ? (
-        <IonSelect
-          value={value}
-          onIonChange={handleChange}
-          placeholder={placeholder}
-        >
-          {options.map((option) => (
-            <IonSelectOption key={option.value} value={option.value}>
-              {option.label}
-            </IonSelectOption>
-          ))}
-        </IonSelect>
+        <Select {...{ options, value, handleChange, placeholder }} />
       ) : (
         <IonInput
           value={value}
@@ -232,5 +250,32 @@ function InputItem({
         ></IonInput>
       )}
     </IonItem>
+  );
+}
+
+function Select({
+  options,
+  value,
+  handleChange,
+  placeholder,
+}: {
+  options: any;
+  value: any;
+  handleChange: any;
+  placeholder: any;
+}) {
+  if (value == null) return null;
+  return (
+    <IonSelect
+      value={value}
+      onIonChange={handleChange}
+      placeholder={placeholder}
+    >
+      {options.map((option: any) => (
+        <IonSelectOption key={option.value} value={option.value}>
+          {option.label}
+        </IonSelectOption>
+      ))}
+    </IonSelect>
   );
 }

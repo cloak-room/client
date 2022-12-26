@@ -6,6 +6,7 @@ export type Item = {
   collected: string | null;
   createdAt: string;
   refunded: string | null;
+  refundedBy: User | null;
   user: User;
   itemType: ItemType;
   storageLocation: string;

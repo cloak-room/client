@@ -1,10 +1,24 @@
 import _ from "lodash";
-import { useDaily, useItems, usePaymentMethods } from "../utils/useData";
-import { PaymentMethod, Item } from "../utils/types";
+import useData, {
+  useDaily,
+  useItems,
+  usePaymentMethods,
+} from "../utils/useData";
+import { PaymentMethod, Item, User } from "../utils/types";
 
-import { IonButton, IonContent, IonPage } from "@ionic/react";
+import {
+  IonButton,
+  IonContent,
+  IonPage,
+  IonSelect,
+  IonSelectOption,
+} from "@ionic/react";
 import Header from "../components/Header";
 import { useEffect, useState } from "react";
+import { userInfo } from "os";
+import { useUserCtx } from "../context/UserContext";
+import { apiUrl } from "../App";
+import { options } from "ionicons/icons";
 
 function isToday(date: string | null) {
   if (date == null) {
@@ -24,6 +38,17 @@ function isToday(date: string | null) {
   return d < endTime && d > startTime;
 }
 
+async function getUsers() {
+  const url = `${apiUrl}/users`;
+  const response = await fetch(url);
+  console.log(response);
+
+  const data: User[] = await response.json();
+  console.log(data);
+
+  return data;
+}
+
 export default function PrintReport() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -32,6 +57,16 @@ export default function PrintReport() {
   const paymentMethods = usePaymentMethods();
 
   const [methods, setMethods] = useState<PaymentMethod[] | null>();
+
+  const { data: users, loading, error, refresh } = useData<User[]>(getUsers);
+  const [reportUser, setReportUser] = useState<User | undefined>(undefined);
+
+  useEffect(() => {
+    if (error.name == "TypeError") refresh();
+  }, [error]);
+  useEffect(() => {
+    if (error.name == "TypeError") refresh();
+  }, [error]);
 
   useEffect(() => {
     if (items.error.name == "TypeError") items.refresh();
@@ -49,15 +84,44 @@ export default function PrintReport() {
   if (items.loading || paymentMethods.loading) {
     return <div>Loading...</div>;
   }
+  const handleChange = (event: Event) =>
+    setReportUser(JSON.parse((event.target as HTMLInputElement).value));
 
   return (
     <IonPage>
       <Header title={"Print Report"} className="dont-print" />
 
       <IonContent fullscreen>
+        <IonSelect
+          value={reportUser}
+          onIonChange={handleChange}
+          placeholder={"Select Report User"}
+          className="dont-print"
+        >
+          {users?.map((option) => (
+            <IonSelectOption key={option.id} value={JSON.stringify(option)}>
+              {option.username}
+            </IonSelectOption>
+          ))}
+        </IonSelect>
         <Report
-          dailySales={items.data?.filter((x) => isToday(x.createdAt)) ?? null}
-          dailyRefunds={items.data?.filter((x) => isToday(x.refunded)) ?? null}
+          user={reportUser}
+          dailySales={
+            items.data?.filter(
+              (x) =>
+                isToday(x.createdAt) &&
+                reportUser &&
+                x.user.id === reportUser.id
+            ) ?? null
+          }
+          dailyRefunds={
+            items.data?.filter(
+              (x) =>
+                isToday(x.refunded) &&
+                reportUser &&
+                x?.refundedBy?.id === reportUser.id
+            ) ?? null
+          }
           methods={methods}
         />
       </IonContent>
@@ -66,16 +130,20 @@ export default function PrintReport() {
 }
 
 function Report({
+  user,
   methods,
   dailySales,
   dailyRefunds,
 }: {
+  user?: User;
   methods?: PaymentMethod[] | null;
   dailySales?: Item[] | null;
   dailyRefunds?: Item[] | null;
 }) {
+  if (user == undefined) return null;
   return (
     <main>
+      <h1>Sales for {user.username}</h1>
       <h1>Sales Today: {dailySales?.length}</h1>
       {methods?.map((x) => (
         <Sale key={x.id} method={x} dailyItems={dailySales} />

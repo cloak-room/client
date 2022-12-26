@@ -25,6 +25,7 @@ import {
   IonList,
   IonCard,
   IonSpinner,
+  useIonAlert,
 } from "@ionic/react";
 
 import { setLightness } from "polished";
@@ -47,6 +48,7 @@ function toLocalDateString(d: Date) {
 export default function SearchPage() {
   const { user } = useUserCtx();
   const [presentToast] = useIonToast();
+  const [presentAlert] = useIonAlert();
   const location = useLocation();
 
   const [search, setSearch] = useState<string | undefined>("");
@@ -113,31 +115,49 @@ export default function SearchPage() {
   const handleCollect = async (item: Item, reset: boolean = false) => {
     const url = `${apiUrl}/items/collect`;
     console.log("collect", item);
+    const collect = async () => {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ id: item.id, reset }),
+      });
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ id: item.id, reset }),
-    });
+      console.log("response", response);
+      const { error, message } = await response.json();
 
-    console.log("response", response);
-    const { error, message } = await response.json();
+      items.refresh();
 
-    items.refresh();
+      // Error or success message using message from the backend
+      presentToast({
+        message: `${message}`,
+        color: error ? "danger" : "success",
+        position: "top",
+        duration: 3000,
+        buttons: [
+          {
+            text: "Dismiss",
+            role: "cancel",
+          },
+        ],
+      });
+    };
 
-    // Error or success message using message from the backend
-    presentToast({
-      message: `${message}`,
-      color: error ? "danger" : "success",
-      position: "top",
-      duration: 3000,
+    presentAlert({
+      header: `Collect. Are you sure?`,
+      cssClass: "custom-alert",
       buttons: [
         {
-          text: "Dismiss",
-          role: "cancel",
+          text: "Cancel",
+          cssClass: "alert-button-cancel",
+          handler: () => false,
+        },
+        {
+          text: "Confirm",
+          cssClass: "alert-button-confirm",
+          handler: collect,
         },
       ],
     });
@@ -147,28 +167,47 @@ export default function SearchPage() {
     const url = `${apiUrl}/items/refund`;
     console.log("refund", item);
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ id: item.id, reset }),
-    });
+    const refund = async () => {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ id: item.id, reset, user: user?.id }),
+      });
 
-    const { error, message } = await response.json();
+      const { error, message } = await response.json();
 
-    items.refresh();
-    // Error or success message using message from the backend
-    presentToast({
-      message: `${message}`,
-      color: error ? "danger" : "success",
-      position: "top",
-      duration: 3000,
+      items.refresh();
+      // Error or success message using message from the backend
+      presentToast({
+        message: `${message}`,
+        color: error ? "danger" : "success",
+        position: "top",
+        duration: 3000,
+        buttons: [
+          {
+            text: "Dismiss",
+            role: "cancel",
+          },
+        ],
+      });
+    };
+
+    presentAlert({
+      header: `Refund. Are you sure?`,
+      cssClass: "custom-alert",
       buttons: [
         {
-          text: "Dismiss",
-          role: "cancel",
+          text: "Cancel",
+          cssClass: "alert-button-cancel",
+          handler: () => false,
+        },
+        {
+          text: "Confirm",
+          cssClass: "alert-button-confirm",
+          handler: refund,
         },
       ],
     });
@@ -342,17 +381,6 @@ function Table({
                       <IonButton
                         size="small"
                         shape="round"
-                        color="danger"
-                        fill={item.refunded ? "outline" : "solid"}
-                        onClick={() =>
-                          functions.handleRefund(item, item.refunded as boolean)
-                        }
-                      >
-                        Refund{item.refunded && "ed"}
-                      </IonButton>
-                      <IonButton
-                        size="small"
-                        shape="round"
                         color="success"
                         fill={item.collected ? "outline" : "solid"}
                         onClick={() =>
@@ -376,32 +404,49 @@ function Table({
             <div slot="content" className="detail-card">
               <IonCard>
                 <IonList class="expandedRowList">
-                  {columns?.map((col, index) => (
-                    <IonItem
-                      key={col.label}
-                      color={index % 2 ? "medium" : "light"}
-                    >
-                      {/* {key === "user"} */}
-                      <IonLabel>{`${col.label}:`}</IonLabel>
-                      <IonLabel>
-                        {(col.displayFunction
-                          ? col.displayFunction(item[col.item])
-                          : item[col.item]) ?? <p>N / A</p>}
-                      </IonLabel>
-                    </IonItem>
-                  ))}
-                  <IonItem key="edit" color="medium">
-                    <Link to={`editDevice/${item.id}`}>
-                      <IonButton
-                        size="small"
-                        shape="round"
-                        color="warning"
-                        fill="solid"
+                  {columns?.map((col, index) =>
+                    col.item !== "actions" ? (
+                      <IonItem
+                        key={col.label}
+                        color={index % 2 ? "medium" : "light"}
                       >
-                        Edit
-                      </IonButton>
-                    </Link>
-                  </IonItem>
+                        {/* {key === "user"} */}
+                        <IonLabel>{`${col.label}:`}</IonLabel>
+                        <IonLabel>
+                          {(col.displayFunction
+                            ? col.displayFunction(item[col.item])
+                            : item[col.item]) ?? <p>N / A</p>}
+                        </IonLabel>
+                      </IonItem>
+                    ) : (
+                      <IonItem key="edit" color="medium">
+                        <IonButton
+                          size="small"
+                          shape="round"
+                          color="danger"
+                          fill={item.refunded ? "outline" : "solid"}
+                          onClick={() =>
+                            functions.handleRefund(
+                              item,
+                              item.refunded as boolean
+                            )
+                          }
+                        >
+                          Refund{item.refunded && "ed"}
+                        </IonButton>
+                        <Link to={`editDevice/${item.id}`}>
+                          <IonButton
+                            size="small"
+                            shape="round"
+                            color="warning"
+                            fill="solid"
+                          >
+                            Edit
+                          </IonButton>
+                        </Link>
+                      </IonItem>
+                    )
+                  )}
                 </IonList>
               </IonCard>
             </div>
