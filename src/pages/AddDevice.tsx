@@ -138,7 +138,7 @@ export default function AddDevicePage() {
         inputs.forEach((input) => {
           const [value, setValue] = input.state;
           const inputType = typeof value;
-          const defaultValue: any = inputType === "string" ? "" : 0;
+          const defaultValue: any = inputType === "string" ? "" : -1;
           setValue(defaultValue);
         });
 
