@@ -75,7 +75,7 @@ export default function SearchPage() {
   }, [location.key]);
 
   useEffect(() => {
-    if (items.error.name == "TypeError") items.refresh();
+    //if (items.error.name == "TypeError") items.refresh();
   }, [items.error]);
 
   const handleChange = (e: SearchbarCustomEvent) => {

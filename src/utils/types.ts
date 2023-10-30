@@ -12,6 +12,15 @@ export type Item = {
   storageLocation: string;
   paymentMethod: PaymentMethod;
 };
+
+export type ItemResult = {
+  data: Item[];
+  pageSize: number;
+  pageCount: number;
+  pageNumber: number;
+  count: number;
+};
+
 export type ItemType = {
   id: number;
   name: string;

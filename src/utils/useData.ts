@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiUrl } from "../App";
-import { Item, ItemType, PaymentMethod } from "./types";
+import { Item, ItemResult, ItemType, PaymentMethod } from "./types";
 
 export default function useData<T>(
   getData: (...args: any[]) => Promise<T>,
@@ -76,7 +76,7 @@ async function getItems(
 
   const data = await res.json();
 
-  data.sort((a: Item, b: Item) => {
+  data.data.sort((a: Item, b: Item) => {
     var textA = a.ownerName.toUpperCase();
     var textB = b.ownerName.toUpperCase();
     return textA < textB ? -1 : textA > textB ? 1 : 0;
@@ -111,7 +111,7 @@ export function useItems(
   start: string = "",
   end: string = ""
 ) {
-  const [data, setData] = useState<Item[] | null>(null);
+  const [data, setData] = useState<ItemResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(false);
   const [r, setR] = useState(true);
@@ -130,6 +130,7 @@ export function useItems(
       }
     })();
   }, [search, start, end, r]);
+  console.log(data);
 
-  return { data, loading, error, refresh };
+  return { data: data?.data, loading, error, refresh };
 }
