@@ -1,0 +1,8 @@
+{
+  "name": "WFF Power Rangers",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react",
+  "id": "f178ab6a"
+}

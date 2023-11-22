@@ -1,0 +1,6 @@
+{
+	"appId": "io.ionic.starter",
+	"appName": "WFF Power Rangers",
+	"webDir": "build",
+	"bundledWebRuntime": false
+}

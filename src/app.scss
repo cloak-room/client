@@ -1,0 +1,48 @@
+@media print {
+  .dont-print {
+    display: none;
+  }
+}
+.sc-ion-alert-md {
+  --max-width: 75%;
+  --width: 50%;
+}
+.detail-card {
+  display: flex;
+  justify-content: center;
+}
+
+.detail-card ion-card {
+  width: 90%
+}
+
+@media only screen and (min-width: 992px) {
+  .detail-card ion-card {
+    width: 80%
+  }
+  
+}
+
+.row:nth-child(even) {
+  background-color: var(--ion-color-light);
+}
+
+.header {
+  background-color: var(--ion-color-primary);
+  color: var(--ion-text-color);
+}
+
+.col {
+  border: solid 1px grey;
+  border-bottom-style: none;
+  border-right-style: none;
+  height: auto;
+}
+
+.col:last-child {
+  border-right: solid 1px grey;
+}
+
+.row:last-child .col {
+  border-bottom: solid 1px grey;
+}
