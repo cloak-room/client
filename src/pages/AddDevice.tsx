@@ -15,6 +15,9 @@ import {
   IonRow,
   IonGrid,
   IonModal,
+  IonIcon,
+  IonItemDivider,
+  IonItemGroup,
 } from "@ionic/react";
 import React, { useEffect, useRef, useState } from "react";
 import { apiUrl } from "../App";
@@ -32,12 +35,14 @@ export default function AddDevicePage() {
   const [presentToast] = useIonToast();
   const history = useHistory();
   const [isPhotoOpen, setIsPhotoOpen] = useState<boolean>(false);
+  const [addToCartIsOpen, setAddToCartIsOpen] = useState<boolean>(false);
 
   const [presentAlert] = useIonAlert();
 
   const { user } = useUserCtx();
   const { itemID }: { itemID?: string } = useParams();
   const { takePhoto, lastPhoto } = useCamera();
+  const [cart, setCart] = useState<number[]>([]);
   // const photoModal = useRef<HTMLIonModalElement>(null);
 
   const { data: items } = useItems({
@@ -65,20 +70,6 @@ export default function AddDevicePage() {
       state: useState<string>(item?.ownerPhoneNumber ?? ""),
     },
     {
-      key: "itemType",
-      label: "Item Type",
-      placeholder: "Type of the item",
-      state: useState<number>(item?.itemType.id ?? -1),
-      options: itemTypes
-        ? itemTypes
-            .sort((a, b) => a.price - b.price)
-            .map((option) => ({
-              value: option.id,
-              label: `${option.name}: ($${(option.price / 100).toFixed(2)})`,
-            }))
-        : [],
-    },
-    {
       key: "comments",
       label: "Comments",
       placeholder: "Enter comments",
@@ -102,6 +93,22 @@ export default function AddDevicePage() {
           }))
         : [],
     },
+    // {
+    //   key: "itemType",
+    //   label: "Item Type",
+    //   placeholder: "Type of the item",
+    //   state: useState<number[]>([item?.itemType.id ?? -1]),
+    //   multiple: false,
+    //   count: itemCount,
+    //   options: itemTypes
+    //     ? itemTypes
+    //         .sort((a, b) => a.price - b.price)
+    //         .map((option) => ({
+    //           value: option.id,
+    //           label: `${option.name}: ($${(option.price / 100).toFixed(2)})`,
+    //         }))
+    //     : [],
+    // },
   ];
 
   useEffect(() => {
@@ -133,6 +140,7 @@ export default function AddDevicePage() {
       ...inputs.map((input) => ({ [input.key]: input.state[0] }))
     );
     args.photo = lastPhoto;
+    args.cart = cart;
     console.log("send", args);
     console.log(itemTypes);
 
@@ -187,7 +195,17 @@ export default function AddDevicePage() {
             ? paymentMethods.find((x) => x.id === args.paymentMethod)?.name
             : ""
         } payment of $${
-          (itemTypes?.find((x) => x.id === args.itemType)?.price ?? 500) / 100
+          cart.length > 0
+            ? cart
+                .map(
+                  (itemType: number) =>
+                    itemTypes?.find((x) => x.id === itemType)?.price ?? 0
+                )
+                .reduce(
+                  (accumulator: number, current: number) =>
+                    accumulator + current
+                ) / 100
+            : 0
         } from ${args.ownerName}`,
         cssClass: "custom-alert",
         buttons: [
@@ -219,19 +237,58 @@ export default function AddDevicePage() {
             {inputs.map((input) => (
               <InputItem {...input} />
             ))}
+            <IonItemGroup>
+              <IonItemDivider>
+                <IonLabel>Cart</IonLabel>
+              </IonItemDivider>
+              {cart.map((itemID, i) => {
+                const item = itemTypes?.find((x) => itemID === x.id);
+                return (
+                  <IonItem lines="none" key={i}>
+                    <IonLabel>
+                      {item?.name}: (${((item?.price ?? 0) / 100).toFixed(2)})
+                    </IonLabel>
+                    <IonButton
+                      color="danger"
+                      onClick={() =>
+                        setCart((cart) => {
+                          const x = [...cart];
+                          x.splice(i, 1);
+                          return x;
+                        })
+                      }
+                    >
+                      Delete
+                    </IonButton>
+                  </IonItem>
+                );
+              })}
+            </IonItemGroup>
             <IonGrid>
-              <IonRow className="ion-align-items-stretch">
-                <IonButton onClick={takePhoto}>Photo</IonButton>
-                {lastPhoto && (
-                  <IonButton
-                    id="open-modal"
-                    onClick={() => setIsPhotoOpen(true)}
-                  >
-                    View Photo
-                  </IonButton>
-                )}
+              <IonRow className="ion-justify-content-between">
+                <div>
+                  <IonButton onClick={takePhoto}>Photo</IonButton>
+                  {lastPhoto && (
+                    <IonButton
+                      id="open-modal"
+                      onClick={() => setIsPhotoOpen(true)}
+                    >
+                      View Photo
+                    </IonButton>
+                  )}
+                </div>
+                <IonButton
+                  className="ion-align-self-end"
+                  fill="outline"
+                  onClick={() => setAddToCartIsOpen(true)}
+                >
+                  Add Item
+                </IonButton>
               </IonRow>
             </IonGrid>
+            <AddToCartModal
+              {...{ itemTypes, addToCartIsOpen, setAddToCartIsOpen, setCart }}
+            />
             <PhotoModal
               {...{ photo: lastPhoto, isPhotoOpen, setIsPhotoOpen }}
             />
@@ -245,18 +302,80 @@ export default function AddDevicePage() {
   );
 }
 
+function AddToCartModal({
+  itemTypes,
+  setAddToCartIsOpen,
+  addToCartIsOpen,
+  setCart,
+}: {
+  itemTypes: any[] | null;
+  addToCartIsOpen: boolean;
+  setAddToCartIsOpen: Function;
+  setCart: React.Dispatch<React.SetStateAction<number[]>>;
+}) {
+  console.log(itemTypes);
+
+  return (
+    <IonModal
+      // ref={photoModal}
+      isOpen={addToCartIsOpen}
+      onWillDismiss={(ev) => setAddToCartIsOpen(false)}
+    >
+      <IonContent fullscreen style={{ height: "100%" }}>
+        <IonList className="ion-no-padding">
+          {itemTypes?.map((x) => (
+            <IonItem>
+              <IonButton
+                fill="clear"
+                expand="full"
+                color="dark"
+                style={{ flex: 1, height: "100%" }}
+                className="ion-no-margin"
+                onClick={() => {
+                  setCart((cart) => [...cart, x.id]);
+                  setAddToCartIsOpen(false);
+                }}
+              >
+                <IonRow
+                  style={{ flex: 1 }}
+                  className="ion-justify-content-between"
+                >
+                  <div>{x.name}</div>
+                  <div>{`$${(x.price / 100).toFixed(2)}`}</div>
+                </IonRow>
+              </IonButton>
+            </IonItem>
+          ))}
+        </IonList>
+        <IonButton
+          expand="full"
+          onClick={() => {
+            setAddToCartIsOpen(false);
+          }}
+        >
+          Close
+        </IonButton>
+      </IonContent>
+    </IonModal>
+  );
+}
+
 function InputItem({
   label,
   hidden,
   placeholder,
   state,
   options,
+  multiple,
+  count,
 }: {
   label: string;
   hidden?: boolean;
   placeholder: string;
   state: [any, React.Dispatch<React.SetStateAction<any>>];
   options?: { label: string; value: number }[];
+  multiple?: boolean;
+  count?: [number, React.Dispatch<React.SetStateAction<number>>];
 }) {
   const [value, setValue] = state;
 
@@ -272,18 +391,24 @@ function InputItem({
   // }, [value]);
 
   return hidden ? null : (
-    <IonItem>
-      <IonLabel>{label}</IonLabel>
-      {options ? (
-        <Select {...{ options, value, handleChange, placeholder }} />
-      ) : (
-        <IonInput
-          value={value}
-          onIonChange={handleChange}
-          placeholder={placeholder}
-        ></IonInput>
-      )}
-    </IonItem>
+    <>
+      {new Array(count != null ? count[0] : 1).fill(null).map((_, i) => (
+        <IonItem>
+          <IonLabel>{label}</IonLabel>
+          {options ? (
+            <Select
+              {...{ options, value, handleChange, placeholder, multiple }}
+            />
+          ) : (
+            <IonInput
+              value={value}
+              onIonChange={handleChange}
+              placeholder={placeholder}
+            ></IonInput>
+          )}
+        </IonItem>
+      ))}
+    </>
   );
 }
 
@@ -292,11 +417,13 @@ function Select({
   value,
   handleChange,
   placeholder,
+  multiple,
 }: {
   options: any;
   value: any;
   handleChange: any;
   placeholder: any;
+  multiple?: boolean;
 }) {
   if (value == null) return null;
   return (
@@ -304,6 +431,7 @@ function Select({
       value={value}
       onIonChange={handleChange}
       placeholder={placeholder}
+      multiple={multiple}
     >
       {options.map((option: any) => (
         <IonSelectOption key={option.value} value={option.value}>
