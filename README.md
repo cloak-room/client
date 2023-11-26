@@ -145,8 +145,18 @@ You will need the following prerequisites to run the project successfully
    cd client
    pnpm install
    ```
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+3. Change the API proxy in package.json if necessary (the default is http://localhost:3001)
+   ```json
+     ...
+     "proxy": "http://localhost:3001"
+     ...
+   ```
+4. Set any necessary config options in .env
+   ```shell
+   # Branding info
+   REACT_APP_BRANDING=CloakRoom
+   ```
+   <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- USAGE EXAMPLES -->
 

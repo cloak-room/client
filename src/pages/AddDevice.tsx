@@ -24,6 +24,7 @@ import Header from "../components/Header";
 import { Redirect, useHistory, useParams } from "react-router";
 import { Item } from "../utils/types";
 import { useCamera } from "../utils/useCamera";
+import PhotoModal from "../components/PhotoModal";
 
 export default function AddDevicePage() {
   const { data: itemTypes } = useItemTypes();
@@ -37,7 +38,7 @@ export default function AddDevicePage() {
   const { user } = useUserCtx();
   const { itemID }: { itemID?: string } = useParams();
   const { takePhoto, lastPhoto } = useCamera();
-  const photoModal = useRef<HTMLIonModalElement>(null);
+  // const photoModal = useRef<HTMLIonModalElement>(null);
 
   const { data: items } = useItems({
     itemID: itemID,
@@ -131,6 +132,7 @@ export default function AddDevicePage() {
       { userId: user?.id, id: item?.id ?? null },
       ...inputs.map((input) => ({ [input.key]: input.state[0] }))
     );
+    args.photo = lastPhoto;
     console.log("send", args);
     console.log(itemTypes);
 
@@ -178,13 +180,14 @@ export default function AddDevicePage() {
     };
 
     if (!item) {
+      console.log(args);
       presentAlert({
         header: `Please Collect ${
           paymentMethods
             ? paymentMethods.find((x) => x.id === args.paymentMethod)?.name
             : ""
         } payment of $${
-          (itemTypes?.find((x) => x.id === args.itemTypeID)?.price ?? 500) / 100
+          (itemTypes?.find((x) => x.id === args.itemType)?.price ?? 500) / 100
         } from ${args.ownerName}`,
         cssClass: "custom-alert",
         buttons: [
@@ -229,24 +232,9 @@ export default function AddDevicePage() {
                 )}
               </IonRow>
             </IonGrid>
-            <IonModal
-              ref={photoModal}
-              isOpen={isPhotoOpen}
-              onWillDismiss={(ev) => setIsPhotoOpen(false)}
-            >
-              <IonContent className="ion-padding">
-                {lastPhoto && <IonImg src={lastPhoto} />}
-                <IonButton
-                  expand="full"
-                  onClick={() => {
-                    setIsPhotoOpen(false);
-                  }}
-                >
-                  Close
-                </IonButton>
-              </IonContent>
-            </IonModal>
-
+            <PhotoModal
+              {...{ photo: lastPhoto, isPhotoOpen, setIsPhotoOpen }}
+            />
             <IonButton onClick={handleAddDevice} expand="full">
               Submit
             </IonButton>

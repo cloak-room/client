@@ -94,12 +94,6 @@ async function getItems({
 
   const data = await res.json();
 
-  data.data.sort((a: Item, b: Item) => {
-    var textA = a.ownerName.toUpperCase();
-    var textB = b.ownerName.toUpperCase();
-    return textA < textB ? -1 : textA > textB ? 1 : 0;
-  });
-
   return data;
 }
 

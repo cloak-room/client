@@ -1,5 +1,5 @@
 {
-  "name": "wff-power-rangers",
+  "name": "cloakroomclient",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -75,5 +75,6 @@
   "devDependencies": {
     "@capacitor/cli": "4.4.0"
   },
-  "description": "An Ionic project"
+  "description": "CloakRoom Client",
+  "proxy": "http://localhost:3001"
 }
