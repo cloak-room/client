@@ -164,7 +164,7 @@ export function useItems({
         setError(err);
       }
     })();
-  }, [search, start, end, r, currentPage, showCollected]);
+  }, [search, start, end, r, currentPage, showCollected, itemID, perPage]);
   console.log(data);
 
   return {

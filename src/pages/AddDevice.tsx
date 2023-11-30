@@ -42,10 +42,11 @@ export default function AddDevicePage() {
   const { user } = useUserCtx();
   const { itemID }: { itemID?: string } = useParams();
   const { takePhoto, lastPhoto } = useCamera();
+  const [oldPhoto, setOldPhoto] = useState<string | null>(null);
   const [cart, setCart] = useState<number[]>([]);
   // const photoModal = useRef<HTMLIonModalElement>(null);
 
-  const { data: items } = useItems({
+  const { data: items, loading: itemsLoading } = useItems({
     itemID: itemID,
     showCollected: true,
     perPage: 1,
@@ -61,31 +62,31 @@ export default function AddDevicePage() {
       key: "ownerName",
       label: "Client Name",
       placeholder: "Enter name",
-      state: useState<string>(item?.ownerName ?? ""),
+      state: useState<string>(),
     },
     {
       key: "ownerPhoneNumber",
       label: "Phone Number",
       placeholder: "Enter name",
-      state: useState<string>(item?.ownerPhoneNumber ?? ""),
+      state: useState<string>(),
     },
     {
       key: "comments",
       label: "Comments",
       placeholder: "Enter comments",
-      state: useState<string>(item?.comments ?? ""),
+      state: useState<string>(),
     },
     {
       key: "storageLocation",
       label: "Location",
       placeholder: "Enter Location",
-      state: useState<string>(item?.storageLocation ?? ""),
+      state: useState<string>(),
     },
     {
       key: "paymentMethod",
       label: "Payment Method",
       placeholder: "Payment Method",
-      state: useState<number>(item?.paymentMethod.id ?? -1),
+      state: useState<number>(-1),
       options: paymentMethods
         ? paymentMethods.map((option) => ({
             value: option.id,
@@ -126,6 +127,8 @@ export default function AddDevicePage() {
           setValue(itemValue);
         }
       });
+      setCart([item.itemType.id]);
+      setOldPhoto(item.imageLocation);
     }
   }, [item]);
 
@@ -160,15 +163,18 @@ export default function AddDevicePage() {
       // If item added successfully
       if (!error) {
         // Clear inputs
-        inputs.forEach((input) => {
-          const [value, setValue] = input.state;
-          const inputType = typeof value;
-          const defaultValue: any = inputType === "string" ? "" : -1;
-          setValue(defaultValue);
-        });
 
         if (args.id != null) {
           history.push("/search");
+        } else {
+          inputs.forEach((input) => {
+            const [value, setValue] = input.state;
+            const inputType = typeof value;
+            const defaultValue: any = inputType === "string" ? "" : -1;
+            setValue(defaultValue);
+            setCart([]);
+            setOldPhoto(null);
+          });
         }
       }
 
@@ -227,7 +233,9 @@ export default function AddDevicePage() {
   };
 
   if (!user) return <Redirect to={"/login"} />;
-
+  console.log("loading", itemID && itemsLoading);
+  if (itemID && itemsLoading) return <p>Loading</p>;
+  console.log(lastPhoto != "" ? lastPhoto : `photos/${item?.imageLocation}`);
   return (
     <IonPage>
       <Header backButton title={(itemID ? "Edit" : "Add") + " Device"} />
@@ -268,7 +276,7 @@ export default function AddDevicePage() {
               <IonRow className="ion-justify-content-between">
                 <div>
                   <IonButton onClick={takePhoto}>Photo</IonButton>
-                  {lastPhoto && (
+                  {(lastPhoto || oldPhoto) && (
                     <IonButton
                       id="open-modal"
                       onClick={() => setIsPhotoOpen(true)}
@@ -290,7 +298,11 @@ export default function AddDevicePage() {
               {...{ itemTypes, addToCartIsOpen, setAddToCartIsOpen, setCart }}
             />
             <PhotoModal
-              {...{ photo: lastPhoto, isPhotoOpen, setIsPhotoOpen }}
+              {...{
+                photo: lastPhoto || `photos/${item?.imageLocation}`,
+                isPhotoOpen,
+                setIsPhotoOpen,
+              }}
             />
             <IonButton onClick={handleAddDevice} expand="full">
               Submit
