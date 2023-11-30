@@ -138,7 +138,7 @@ export default function Table({
                     ) : (
                       (col.displayFunction
                         ? col.displayFunction(item[col.item])
-                        : item[col.item]) ?? <p>N / A</p>
+                        : item[col.item]) ?? <IonLabel>N / A</IonLabel>
                     )}
                   </IonCol>
                 ))}
