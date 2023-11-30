@@ -62,31 +62,31 @@ export default function AddDevicePage() {
       key: "ownerName",
       label: "Client Name",
       placeholder: "Enter name",
-      state: useState<string>(),
+      state: useState<string | undefined>(undefined),
     },
     {
       key: "ownerPhoneNumber",
       label: "Phone Number",
       placeholder: "Enter name",
-      state: useState<string>(),
+      state: useState<string | undefined>(undefined),
     },
     {
       key: "comments",
       label: "Comments",
       placeholder: "Enter comments",
-      state: useState<string>(),
+      state: useState<string | undefined>(undefined),
     },
     {
       key: "storageLocation",
       label: "Location",
       placeholder: "Enter Location",
-      state: useState<string>(""),
+      state: useState<string | undefined>(undefined),
     },
     {
       key: "bagNumber",
       label: "Bag Number",
       placeholder: "Enter Number",
-      state: useState<string>(),
+      state: useState<string | undefined>(undefined),
     },
     {
       key: "paymentMethod",
@@ -150,10 +150,13 @@ export default function AddDevicePage() {
     );
     args.photo = lastPhoto;
     args.cart = cart;
+
     console.log("send", args);
     console.log(itemTypes);
 
-    const addHandler = async () => {
+    const addHandler = async (dryRun?: boolean) => {
+      args.dryRun = dryRun;
+
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -170,7 +173,7 @@ export default function AddDevicePage() {
       if (!error) {
         if (args.id != null) {
           history.push("/search");
-        } else {
+        } else if (!dryRun) {
           // Clear inputs
           inputs.forEach((input) => {
             const [value, setValue] = input.state;
@@ -184,21 +187,32 @@ export default function AddDevicePage() {
         }
       }
 
-      // Error or success message using message from the backend
-      presentToast({
-        message: `${message}`,
-        color: error ? "danger" : "success",
-        position: "top",
-        duration: 3000,
-        buttons: [
-          {
-            text: "Dismiss",
-            role: "cancel",
-          },
-        ],
-      });
+      if (!dryRun || error) {
+        // Error or success message using message from the backend
+        presentToast({
+          message: `${message}`,
+          color: error ? "danger" : "success",
+          position: "top",
+          duration: 3000,
+          buttons: [
+            {
+              text: "Dismiss",
+              role: "cancel",
+            },
+          ],
+        });
+      }
+
+      return { error, message };
     };
 
+    // Validate the inputs with a dry run
+    const dryRunResult = await addHandler(true);
+    if (dryRunResult.error) {
+      return;
+    }
+
+    // Add or update for real
     if (!item) {
       console.log(args);
       presentAlert({
