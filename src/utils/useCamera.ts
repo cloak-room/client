@@ -30,5 +30,6 @@ export function useCamera() {
   return {
     takePhoto,
     lastPhoto,
+    setLastPhoto,
   };
 }

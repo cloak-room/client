@@ -41,7 +41,7 @@ export default function AddDevicePage() {
 
   const { user } = useUserCtx();
   const { itemID }: { itemID?: string } = useParams();
-  const { takePhoto, lastPhoto } = useCamera();
+  const { takePhoto, lastPhoto, setLastPhoto } = useCamera();
   const [oldPhoto, setOldPhoto] = useState<string | null>(null);
   const [cart, setCart] = useState<number[]>([]);
   // const photoModal = useRef<HTMLIonModalElement>(null);
@@ -179,6 +179,7 @@ export default function AddDevicePage() {
             setValue(defaultValue);
             setCart([]);
             setOldPhoto(null);
+            setLastPhoto(undefined);
           });
         }
       }
