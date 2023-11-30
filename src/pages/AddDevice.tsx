@@ -42,6 +42,7 @@ export default function AddDevicePage() {
   const { user } = useUserCtx();
   const { itemID }: { itemID?: string } = useParams();
   const { takePhoto, lastPhoto } = useCamera();
+  const [oldPhoto, setOldPhoto] = useState<string | null>(null);
   const [cart, setCart] = useState<number[]>([]);
   // const photoModal = useRef<HTMLIonModalElement>(null);
 
@@ -125,6 +126,8 @@ export default function AddDevicePage() {
         } else if (itemValue) {
           setValue(itemValue);
         }
+        setCart([item.itemType.id]);
+        setOldPhoto(item.imageLocation);
       });
     }
   }, [item]);
@@ -227,7 +230,7 @@ export default function AddDevicePage() {
   };
 
   if (!user) return <Redirect to={"/login"} />;
-
+  console.log(lastPhoto != "" ? lastPhoto : `photos/${item?.imageLocation}`);
   return (
     <IonPage>
       <Header backButton title={(itemID ? "Edit" : "Add") + " Device"} />
@@ -268,7 +271,7 @@ export default function AddDevicePage() {
               <IonRow className="ion-justify-content-between">
                 <div>
                   <IonButton onClick={takePhoto}>Photo</IonButton>
-                  {lastPhoto && (
+                  {(lastPhoto || oldPhoto) && (
                     <IonButton
                       id="open-modal"
                       onClick={() => setIsPhotoOpen(true)}
@@ -290,7 +293,11 @@ export default function AddDevicePage() {
               {...{ itemTypes, addToCartIsOpen, setAddToCartIsOpen, setCart }}
             />
             <PhotoModal
-              {...{ photo: lastPhoto, isPhotoOpen, setIsPhotoOpen }}
+              {...{
+                photo: lastPhoto || `photos/${item?.imageLocation}`,
+                isPhotoOpen,
+                setIsPhotoOpen,
+              }}
             />
             <IonButton onClick={handleAddDevice} expand="full">
               Submit

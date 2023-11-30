@@ -9,6 +9,7 @@ export type Item = {
   refundedBy: User | null;
   user: User;
   itemType: ItemType;
+  imageLocation: string | null;
   storageLocation: string;
   paymentMethod: PaymentMethod;
 };
