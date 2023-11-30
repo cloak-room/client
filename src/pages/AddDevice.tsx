@@ -80,6 +80,12 @@ export default function AddDevicePage() {
       key: "storageLocation",
       label: "Location",
       placeholder: "Enter Location",
+      state: useState<string>(""),
+    },
+    {
+      key: "bagNumber",
+      label: "Bag Number",
+      placeholder: "Enter Number",
       state: useState<string>(),
     },
     {
@@ -162,11 +168,10 @@ export default function AddDevicePage() {
 
       // If item added successfully
       if (!error) {
-        // Clear inputs
-
         if (args.id != null) {
           history.push("/search");
         } else {
+          // Clear inputs
           inputs.forEach((input) => {
             const [value, setValue] = input.state;
             const inputType = typeof value;

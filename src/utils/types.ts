@@ -11,6 +11,7 @@ export type Item = {
   itemType: ItemType;
   imageLocation: string | null;
   storageLocation: string;
+  bagNumber: number | null;
   paymentMethod: PaymentMethod;
 };
 

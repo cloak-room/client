@@ -262,14 +262,16 @@ export default function SearchPage() {
                     displayFunction: (x: User) => x.username,
                   },
                   { item: "ownerName", label: "Owner", className: "" },
-                  { item: "ownerPhoneNumber", label: "Phone #", className: "" },
                   { item: "storageLocation", label: "Location", className: "" },
+                  { item: "bagNumber", label: "Bag", className: "" },
+
                   {
                     item: "itemType",
                     label: "Type",
                     className: "ion-hide-sm-down",
                     displayFunction: (x: ItemType) => x.name,
                   },
+                  { item: "ownerPhoneNumber", label: "Phone #", className: "" },
                   {
                     item: "itemType",
                     label: "Price",
