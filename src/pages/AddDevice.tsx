@@ -124,10 +124,10 @@ export default function AddDevicePage() {
       inputs.forEach((input) => {
         const [value, setValue] = input.state;
         const itemValue: any = item[input.key as keyof Item];
-
+        console.log(input);
         console.log(itemValue);
 
-        if (typeof itemValue == "object") {
+        if (typeof itemValue == "object" && itemValue != null) {
           setValue(itemValue.id);
         } else if (itemValue) {
           setValue(itemValue);

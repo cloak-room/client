@@ -65,6 +65,8 @@ async function getItems({
   showCollected = false,
   perPage,
   itemID,
+  stats = false,
+  userID,
 }: {
   search?: string;
   start?: string;
@@ -74,6 +76,8 @@ async function getItems({
   currentPage?: number;
   perPage?: number;
   itemID?: string;
+  stats?: boolean;
+  userID?: number;
 }) {
   console.log(search);
   // const startTime = new Date(start);
@@ -85,11 +89,13 @@ async function getItems({
   const pageToken = currentPage === null ? "" : `p=${currentPage}&`;
   const perPageToken = perPage === null ? "" : `perPage=${perPage}&`;
   const itemIDToken = itemID == null ? "" : `id=${itemID}&`;
+  const userIDToken = userID == null ? "" : `user=${userID}&`;
+  const statsToken = stats ? "/stats" : "";
 
   const collectedToken =
     showCollected === null ? "" : `showCollected=${showCollected ? 1 : 0}&`;
   const res = await fetch(
-    `${apiUrl}/items?${searchToken}${startToken}${endToken}${pageToken}${collectedToken}${perPageToken}${itemIDToken}`
+    `${apiUrl}/items${statsToken}?${searchToken}${startToken}${endToken}${pageToken}${collectedToken}${perPageToken}${itemIDToken}${userIDToken}`
   );
 
   const data = await res.json();
@@ -155,6 +161,68 @@ export function useItems({
             showCollected,
             perPage,
             itemID,
+          })
+        );
+        setLoading(false);
+      } catch (err) {
+        setData(null);
+        setLoading(false);
+        setError(err);
+      }
+    })();
+  }, [search, start, end, r, currentPage, showCollected, itemID, perPage]);
+  console.log(data);
+
+  return {
+    data: data?.data,
+    loading,
+    error,
+    refresh,
+    pageCount: data?.pageCount,
+  };
+}
+
+export function useStatistics({
+  search = "",
+  start = "",
+  end = "",
+  currentPage = 1,
+  showCollected = false,
+  perPage,
+  itemID,
+  userID,
+}: {
+  search?: string;
+  start?: string;
+  end?: string;
+  currentpage?: number;
+  showCollected?: boolean;
+  currentPage?: number;
+  perPage?: number;
+  itemID?: string;
+  userID?: number;
+}) {
+  const [data, setData] = useState<ItemResult | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<any>(false);
+  const [r, setR] = useState(true);
+
+  const refresh = (): void => setR((o) => !o);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setData(
+          await getItems({
+            search,
+            start,
+            end,
+            currentPage,
+            showCollected,
+            perPage,
+            itemID,
+            stats: true,
+            userID,
           })
         );
         setLoading(false);

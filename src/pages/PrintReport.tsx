@@ -3,6 +3,7 @@ import useData, {
   useDaily,
   useItems,
   usePaymentMethods,
+  useStatistics,
 } from "../utils/useData";
 import { PaymentMethod, Item, User } from "../utils/types";
 
@@ -61,9 +62,9 @@ export default function PrintReport() {
   const { data: users, loading, error, refresh } = useData<User[]>(getUsers);
   const [reportUser, setReportUser] = useState<User | undefined>(undefined);
 
-  useEffect(() => {
-    if (error.name == "TypeError") refresh();
-  }, [error]);
+  const stats = useStatistics({ userID: reportUser?.id });
+  console.log(reportUser);
+
   useEffect(() => {
     if (error.name == "TypeError") refresh();
   }, [error]);
