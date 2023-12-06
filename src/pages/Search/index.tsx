@@ -43,6 +43,7 @@ export default function SearchPage() {
 
   const [search, setSearch] = useState<string | undefined>("");
   const [showCollected, setShowCollected] = useState(false);
+  const [showStored, setShowStored] = useState(true);
 
   const datetime = useRef<null | HTMLIonDatetimeElement>(null);
   const [startDate, setStartDate] = useState<string>("");
@@ -67,12 +68,9 @@ export default function SearchPage() {
     end: endDate,
     currentPage,
     showCollected,
+    showStored,
     perPage,
   });
-
-  useEffect(() => {
-    items.refresh();
-  }, [location.key]);
 
   useEffect(() => {
     //if (items.error.name == "TypeError") items.refresh();
@@ -85,6 +83,11 @@ export default function SearchPage() {
 
   const handleShowCollected = (e: CheckboxCustomEvent) => {
     setShowCollected(e.detail.checked);
+    console.log(e.detail.checked);
+  };
+
+  const handleShowStored = (e: CheckboxCustomEvent) => {
+    setShowStored(e.detail.checked);
     console.log(e.detail.checked);
   };
 
@@ -234,6 +237,14 @@ export default function SearchPage() {
                     onIonChange={handleShowCollected}
                   ></IonCheckbox>
                   <IonLabel>Show Collected</IonLabel>
+                </IonItem>
+                <IonItem>
+                  <IonCheckbox
+                    slot="start"
+                    indeterminate={showStored}
+                    onIonChange={handleShowStored}
+                  ></IonCheckbox>
+                  <IonLabel>Show Stored</IonLabel>
                 </IonItem>
                 <IonDatetime
                   ref={datetime}
