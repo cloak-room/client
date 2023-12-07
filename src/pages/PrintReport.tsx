@@ -78,7 +78,7 @@ export default function PrintReport() {
 
   return (
     <IonPage>
-      <Header title={"Print Report"} className="dont-print" />
+      <Header backButton title={"Print Report"} className="dont-print" />
 
       <IonContent fullscreen>
         <IonSelect
