@@ -16,7 +16,9 @@ export default function Header({ title, backButton = false }: any) {
   return (
     <IonHeader className="dont-print">
       <IonToolbar className="dont-print">
-        <IonButtons slot="start">{backButton && <IonBackButton />}</IonButtons>
+        <IonButtons slot="start">
+          {backButton && <IonBackButton defaultHref="/search" />}
+        </IonButtons>
         <IonTitle>{title}</IonTitle>
         <IonButtons slot="end">
           {user ? (

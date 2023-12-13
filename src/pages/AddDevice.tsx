@@ -28,11 +28,12 @@ import { Redirect, useHistory, useParams } from "react-router";
 import { Item } from "../utils/types";
 import { useCamera } from "../utils/useCamera";
 import PhotoModal from "../components/PhotoModal";
+import useMessage from "../utils/useMessage";
 
 export default function AddDevicePage() {
-  const { data: itemTypes } = useItemTypes();
   const { data: paymentMethods } = usePaymentMethods();
-  const [presentToast] = useIonToast();
+  const { data: itemTypes } = useItemTypes();
+  const toast = useMessage();
   const history = useHistory();
   const [isPhotoOpen, setIsPhotoOpen] = useState<boolean>(false);
   const [addToCartIsOpen, setAddToCartIsOpen] = useState<boolean>(false);
@@ -80,7 +81,7 @@ export default function AddDevicePage() {
       key: "storageLocation",
       label: "Location",
       placeholder: "Enter Location",
-      state: useState<string | undefined>(undefined),
+      state: useState<string | undefined>(""),
     },
     {
       key: "bagNumber",
@@ -124,10 +125,10 @@ export default function AddDevicePage() {
       inputs.forEach((input) => {
         const [value, setValue] = input.state;
         const itemValue: any = item[input.key as keyof Item];
-
+        console.log(input);
         console.log(itemValue);
 
-        if (typeof itemValue == "object") {
+        if (typeof itemValue == "object" && itemValue != null) {
           setValue(itemValue.id);
         } else if (itemValue) {
           setValue(itemValue);
@@ -189,18 +190,7 @@ export default function AddDevicePage() {
 
       if (!dryRun || error) {
         // Error or success message using message from the backend
-        presentToast({
-          message: `${message}`,
-          color: error ? "danger" : "success",
-          position: "top",
-          duration: 3000,
-          buttons: [
-            {
-              text: "Dismiss",
-              role: "cancel",
-            },
-          ],
-        });
+        toast.present(message, error);
       }
 
       return { error, message };
@@ -258,7 +248,7 @@ export default function AddDevicePage() {
   console.log(lastPhoto != "" ? lastPhoto : `photos/${item?.imageLocation}`);
   return (
     <IonPage>
-      <Header backButton title={(itemID ? "Edit" : "Add") + " Device"} />
+      <Header backButton title={(itemID ? "Edit" : "Add") + " Items"} />
       <IonContent fullscreen>
         <main>
           <IonList>
@@ -355,29 +345,31 @@ function AddToCartModal({
     >
       <IonContent fullscreen style={{ height: "100%" }}>
         <IonList className="ion-no-padding">
-          {itemTypes?.map((x) => (
-            <IonItem>
-              <IonButton
-                fill="clear"
-                expand="full"
-                color="dark"
-                style={{ flex: 1, height: "100%" }}
-                className="ion-no-margin"
-                onClick={() => {
-                  setCart((cart) => [...cart, x.id]);
-                  setAddToCartIsOpen(false);
-                }}
-              >
-                <IonRow
-                  style={{ flex: 1 }}
-                  className="ion-justify-content-between"
+          {itemTypes
+            ?.sort((a, b) => a.price - b.price)
+            ?.map((x) => (
+              <IonItem key={x.id}>
+                <IonButton
+                  fill="clear"
+                  expand="full"
+                  color="dark"
+                  style={{ flex: 1, height: "100%" }}
+                  className="ion-no-margin"
+                  onClick={() => {
+                    setCart((cart) => [...cart, x.id]);
+                    setAddToCartIsOpen(false);
+                  }}
                 >
-                  <div>{x.name}</div>
-                  <div>{`$${(x.price / 100).toFixed(2)}`}</div>
-                </IonRow>
-              </IonButton>
-            </IonItem>
-          ))}
+                  <IonRow
+                    style={{ flex: 1 }}
+                    className="ion-justify-content-between"
+                  >
+                    <div>{x.name}</div>
+                    <div>{`$${(x.price / 100).toFixed(2)}`}</div>
+                  </IonRow>
+                </IonButton>
+              </IonItem>
+            ))}
         </IonList>
         <IonButton
           expand="full"
@@ -425,7 +417,7 @@ function InputItem({
   return hidden ? null : (
     <>
       {new Array(count != null ? count[0] : 1).fill(null).map((_, i) => (
-        <IonItem>
+        <IonItem key={i}>
           <IonLabel>{label}</IonLabel>
           {options ? (
             <Select

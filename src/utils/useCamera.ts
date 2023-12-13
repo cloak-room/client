@@ -16,7 +16,7 @@ export function useCamera() {
   const takePhoto = async () => {
     const allowed = await Camera.checkPermissions();
     if (!allowed) {
-      Camera.requestPermissions();
+      await Camera.requestPermissions();
     }
 
     const photo = await Camera.getPhoto({

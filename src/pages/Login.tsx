@@ -18,6 +18,7 @@ import { User, useUserCtx } from "../context/UserContext";
 import useData from "../utils/useData";
 import { useHistory } from "react-router-dom";
 import Header from "../components/Header";
+import useMessage from "../utils/useMessage";
 
 async function getUsers() {
   const url = `${apiUrl}/users`;
@@ -33,7 +34,7 @@ async function getUsers() {
 export default function LoginPage() {
   const { data: users, loading, error, refresh } = useData<User[]>(getUsers);
   const { setUser } = useUserCtx();
-  const [presentToast] = useIonToast();
+  const toast = useMessage();
   const history = useHistory();
 
   const [username, setUsername] = useState<string>("");
@@ -51,33 +52,10 @@ export default function LoginPage() {
       setUser(selected);
       window.localStorage.setItem("user", JSON.stringify(selected));
       console.log("logged in", selected);
-
-      presentToast({
-        message: "Login Successful",
-        color: "success",
-        position: "top",
-        duration: 3000,
-        buttons: [
-          {
-            text: "Dismiss",
-            role: "cancel",
-          },
-        ],
-      });
+      toast.present("Login Successful", false);
       history.push("/search");
     } else {
-      presentToast({
-        message: `You must select a user`,
-        color: "danger",
-        position: "top",
-        duration: 3000,
-        buttons: [
-          {
-            text: "Dismiss",
-            role: "cancel",
-          },
-        ],
-      });
+      toast.present("You must select a user", true);
     }
     return;
     const url = `${process.env.API ?? ""}/login`;
@@ -111,7 +89,7 @@ export default function LoginPage() {
             >
               {users &&
                 users.map((user) => (
-                  <IonItem>
+                  <IonItem key={user.id}>
                     <IonLabel>{user.username}</IonLabel>
                     <IonRadio
                       slot="end"

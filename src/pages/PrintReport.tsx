@@ -3,6 +3,7 @@ import useData, {
   useDaily,
   useItems,
   usePaymentMethods,
+  useStatistics,
 } from "../utils/useData";
 import { PaymentMethod, Item, User } from "../utils/types";
 
@@ -61,20 +62,8 @@ export default function PrintReport() {
   const { data: users, loading, error, refresh } = useData<User[]>(getUsers);
   const [reportUser, setReportUser] = useState<User | undefined>(undefined);
 
-  useEffect(() => {
-    if (error.name == "TypeError") refresh();
-  }, [error]);
-  useEffect(() => {
-    if (error.name == "TypeError") refresh();
-  }, [error]);
-
-  useEffect(() => {
-    if (items.error.name == "TypeError") items.refresh();
-  }, [items.error]);
-
-  useEffect(() => {
-    if (paymentMethods.error.name == "TypeError") paymentMethods.refresh();
-  }, [paymentMethods.error]);
+  const stats = useStatistics({ userID: reportUser?.id });
+  console.log("user", stats);
 
   useEffect(() => {
     setMethods(paymentMethods.data);
@@ -89,7 +78,7 @@ export default function PrintReport() {
 
   return (
     <IonPage>
-      <Header title={"Print Report"} className="dont-print" />
+      <Header backButton title={"Print Report"} className="dont-print" />
 
       <IonContent fullscreen>
         <IonSelect
@@ -104,26 +93,7 @@ export default function PrintReport() {
             </IonSelectOption>
           ))}
         </IonSelect>
-        <Report
-          user={reportUser}
-          dailySales={
-            items.data?.filter(
-              (x) =>
-                isToday(x.createdAt) &&
-                reportUser &&
-                x.user.id === reportUser.id
-            ) ?? null
-          }
-          dailyRefunds={
-            items.data?.filter(
-              (x) =>
-                isToday(x.refunded) &&
-                reportUser &&
-                x?.refundedBy?.id === reportUser.id
-            ) ?? null
-          }
-          methods={methods}
-        />
+        <Report user={reportUser} stats={stats.data} methods={methods} />
       </IonContent>
     </IonPage>
   );
@@ -132,26 +102,25 @@ export default function PrintReport() {
 function Report({
   user,
   methods,
-  dailySales,
-  dailyRefunds,
+  stats,
 }: {
   user?: User;
   methods?: PaymentMethod[] | null;
-  dailySales?: Item[] | null;
-  dailyRefunds?: Item[] | null;
+  stats?: any | null;
 }) {
   if (user == undefined) return null;
+  const totals = stats?.totals;
   return (
     <main>
       <h1>Sales for {user.username}</h1>
-      <h1>Sales Today: {dailySales?.length}</h1>
-      {methods?.map((x) => (
+      <h1>Sales Today: ${totals?.total?.totalPrice / 100}</h1>
+      {/* {methods?.map((x) => (
         <Sale key={x.id} method={x} dailyItems={dailySales} />
-      ))}
-      <h1>Refunds Today: {dailyRefunds?.length}</h1>
-      {methods?.map((x) => (
+      ))} */}
+      <h1>Refunds Today: ${totals?.refunded?.totalPrice / 100}</h1>
+      {/* {methods?.map((x) => (
         <Sale key={x.id} method={x} dailyItems={dailyRefunds} refund={true} />
-      ))}
+      ))} */}
       <IonButton className="dont-print" onClick={() => window.print()}>
         Print
       </IonButton>
