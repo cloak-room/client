@@ -248,7 +248,7 @@ export default function AddDevicePage() {
   console.log(lastPhoto != "" ? lastPhoto : `photos/${item?.imageLocation}`);
   return (
     <IonPage>
-      <Header backButton title={(itemID ? "Edit" : "Add") + " Device"} />
+      <Header backButton title={(itemID ? "Edit" : "Add") + " Items"} />
       <IonContent fullscreen>
         <main>
           <IonList>
