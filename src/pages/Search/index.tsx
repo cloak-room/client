@@ -30,6 +30,7 @@ import { add } from "ionicons/icons";
 import { Link, useLocation } from "react-router-dom";
 import { useUserCtx } from "../../context/UserContext";
 import Table from "./Table";
+import useOptions from "../../utils/useOptions";
 
 function toLocalDateString(d: Date) {
   return d.toLocaleString("en-AU").slice(0, 10).split("/").reverse().join("-");
@@ -41,9 +42,11 @@ export default function SearchPage() {
   const [presentAlert] = useIonAlert();
   const location = useLocation();
 
+  const { options, updateOption } = useOptions();
+
   const [search, setSearch] = useState<string | undefined>("");
-  const [showCollected, setShowCollected] = useState(false);
-  const [showStored, setShowStored] = useState(true);
+  // const [showCollected, setShowCollected] = useState(false);
+  // const [showStored, setShowStored] = useState(true);
 
   const datetime = useRef<null | HTMLIonDatetimeElement>(null);
   const [startDate, setStartDate] = useState<string>("");
@@ -67,8 +70,8 @@ export default function SearchPage() {
     start: startDate,
     end: endDate,
     currentPage,
-    showCollected,
-    showStored,
+    showCollected: options.showCollected,
+    showStored: options.showStored,
     perPage,
   });
 
@@ -82,12 +85,14 @@ export default function SearchPage() {
   };
 
   const handleShowCollected = (e: CheckboxCustomEvent) => {
-    setShowCollected(e.detail.checked);
+    // setShowCollected(e.detail.checked);
+    updateOption("showCollected", e.detail.checked);
     console.log(e.detail.checked);
   };
 
   const handleShowStored = (e: CheckboxCustomEvent) => {
-    setShowStored(e.detail.checked);
+    // setShowStored(e.detail.checked);
+    updateOption("showStored", e.detail.checked);
     console.log(e.detail.checked);
   };
 
@@ -233,7 +238,7 @@ export default function SearchPage() {
                 <IonItem>
                   <IonCheckbox
                     slot="start"
-                    indeterminate={showCollected}
+                    indeterminate={options.showCollected}
                     onIonChange={handleShowCollected}
                   ></IonCheckbox>
                   <IonLabel>Show Collected</IonLabel>
@@ -241,7 +246,7 @@ export default function SearchPage() {
                 <IonItem>
                   <IonCheckbox
                     slot="start"
-                    indeterminate={showStored}
+                    indeterminate={options.showStored}
                     onIonChange={handleShowStored}
                   ></IonCheckbox>
                   <IonLabel>Show Stored</IonLabel>
