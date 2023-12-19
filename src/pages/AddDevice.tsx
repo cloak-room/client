@@ -29,6 +29,7 @@ import { Item } from "../utils/types";
 import { useCamera } from "../utils/useCamera";
 import PhotoModal from "../components/PhotoModal";
 import useMessage from "../utils/useMessage";
+import CameraModal from "../components/CameraModal";
 
 export default function AddDevicePage() {
   const { data: paymentMethods } = usePaymentMethods();
@@ -307,7 +308,7 @@ export default function AddDevicePage() {
             </IonGrid>
             <AddToCartModal
               {...{ itemTypes, addToCartIsOpen, setAddToCartIsOpen, setCart }}
-            />
+            />{" "}
             <PhotoModal
               {...{
                 photo: lastPhoto || `photos/${item?.imageLocation}`,
