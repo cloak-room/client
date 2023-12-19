@@ -74,6 +74,7 @@ export default function SearchPage() {
     showStored: options.showStored,
     perPage,
   });
+  console.log(location?.state);
 
   useEffect(() => {
     //if (items.error.name == "TypeError") items.refresh();

@@ -173,7 +173,8 @@ export default function AddDevicePage() {
       // If item added successfully
       if (!error) {
         if (args.id != null) {
-          history.push("/search");
+          //history.push("/search");
+          window.location.href = "/search";
         } else if (!dryRun) {
           // Clear inputs
           inputs.forEach((input) => {
