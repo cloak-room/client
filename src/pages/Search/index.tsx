@@ -78,7 +78,10 @@ export default function SearchPage() {
 
   useEffect(() => {
     //if (items.error.name == "TypeError") items.refresh();
-  }, [items.error]);
+    setInterval(() => {
+      items.refresh();
+    }, 2000);
+  }, []);
 
   const handleChange = (e: SearchbarCustomEvent) => {
     clearTimeout(t);

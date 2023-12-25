@@ -43,8 +43,9 @@ export default function useData<T>(
         setData(await getData());
         setLoading(false);
         if (r > 0) {
-          toast.present(`Connection established after ${r} attempts`, false);
           setR(0);
+        } else if (r > 1) {
+          toast.present(`Connection established after ${r} attempts`, false);
         }
       } catch (err) {
         console.log(data);
@@ -170,7 +171,6 @@ export function useItems({
   search?: string;
   start?: string;
   end?: string;
-  currentpage?: number;
   showCollected?: boolean;
   showStored?: boolean;
 
@@ -203,8 +203,9 @@ export function useItems({
         );
         setLoading(false);
         if (r > 0) {
-          toast.present(`Connection established after ${r} attempts`, false);
           setR(0);
+        } else if (r > 1) {
+          toast.present(`Connection established after ${r} attempts`, false);
         }
       } catch (err) {
         setData(null);
@@ -281,8 +282,9 @@ export function useStatistics({
         );
         setLoading(false);
         if (r > 0) {
-          toast.present(`Connection established after ${r} attempts`, false);
           setR(0);
+        } else if (r > 1) {
+          toast.present(`Connection established after ${r} attempts`, false);
         }
       } catch (err) {
         setData(null);
