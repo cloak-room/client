@@ -80,7 +80,7 @@ export default function SearchPage() {
     //if (items.error.name == "TypeError") items.refresh();
     setInterval(() => {
       items.refresh();
-    }, 2000);
+    }, 5000);
   }, []);
 
   const handleChange = (e: SearchbarCustomEvent) => {
